@@ -1,0 +1,14 @@
+name: CI and automated releases
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  ci:
+    uses: relaycorp/shared-workflows/.github/workflows/nodejs-knative-ci.yml@main
+    with:
+      docker_image_local_name: dev.local/letro-server
+      dockerhub_username: ${{ vars.DOCKERHUB_USERNAME }}
+      kubernetes_app_name: letro-server
+    secrets:
+      dockerhub_password: ${{ secrets.DOCKERHUB_PASSWORD }}

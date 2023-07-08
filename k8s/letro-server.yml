@@ -1,0 +1,52 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: letro-server
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/min-scale: "1"
+      labels:
+        app.kubernetes.io/name: letro-server
+    spec:
+      containers:
+        - name: server
+          image: dev.local/letro-server
+          args: [server]
+          readinessProbe:
+            httpGet:
+              path: /
+            initialDelaySeconds: 1
+          env:
+            - name: MONGODB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: credentials
+                  key: mongodb_username
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: credentials
+                  key: mongodb_password
+            - name: MONGODB_URI
+              value: mongodb://$(MONGODB_USERNAME):$(MONGODB_PASSWORD)@mongodb.default
+
+          envFrom:
+            - configMapRef:
+                name: letro-server
+---
+apiVersion: sources.knative.dev/v1
+kind: SinkBinding
+metadata:
+  name: letro-server-sink-binding
+spec:
+  subject:
+    apiVersion: serving.knative.dev/v1
+    kind: Service
+    name: letro-server
+  sink:
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      kind: Broker
+      name: broker

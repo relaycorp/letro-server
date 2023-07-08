@@ -1,0 +1,16 @@
+apiVersion: skaffold/v4beta2
+kind: Config
+metadata:
+  name: letro-server
+requires:
+  - path: skaffold-deps.yml
+build:
+  artifacts:
+    - image: dev.local/letro-server
+  local:
+    push: false
+manifests:
+  rawYaml:
+    - k8s/*.yml
+deploy:
+  kubectl: {}
