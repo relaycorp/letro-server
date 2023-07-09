@@ -5,9 +5,6 @@
   "files": [
     "build"
   ],
-  "bin": {
-    "server": "./build/bin/server.js"
-  },
   "scripts": {
     "prebuild": "run-s clean",
     "build": "tsc -p tsconfig.json",
