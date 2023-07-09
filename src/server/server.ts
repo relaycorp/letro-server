@@ -3,7 +3,7 @@ import type { BaseLogger } from 'pino';
 
 import { makeFastify } from '../utilities/fastify/server.js';
 
-import healthcheckRoutes from './routes/healthcheck.js';
+import healthcheckRoutes from './healthcheck.js';
 
 async function makeServerPlugin(server: FastifyInstance): Promise<void> {
   const rootRoutes: FastifyPluginCallback<RouteOptions>[] = [healthcheckRoutes];

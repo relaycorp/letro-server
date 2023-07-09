@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 
-import { makeTestServer } from '../../testUtils/server.js';
+import { makeTestServer } from '../testUtils/server.js';
 
 describe('healthcheck routes', () => {
   const getTestServerFixture = makeTestServer();
