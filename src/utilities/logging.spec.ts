@@ -57,18 +57,7 @@ describe('makeLogger', () => {
     expect(logger).toHaveProperty([pinoSymbols.messageKeySym], messageKey);
   });
 
-  test('App name should be set to LOG_ENV_NAME if present', () => {
-    const environmentName = 'env-name';
-    mockEnvironmentVariables({ ...REQUIRED_ENV_VARS, LOG_ENV_NAME: environmentName });
-    makeLogger();
-
-    expect(getPinoOptions).toHaveBeenCalledWith(
-      undefined,
-      expect.objectContaining({ name: environmentName }),
-    );
-  });
-
-  test('App name should be "letro-server" if LOG_ENV_NAME if absent', () => {
+  test('App name should be "letro-server"', () => {
     makeLogger();
 
     expect(getPinoOptions).toHaveBeenCalledWith(
