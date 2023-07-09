@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { Connection } from 'mongoose';
 
-import { makeServer } from '../server.js';
+import { makeServer } from '../server/server.js';
 
 import { makeMockLogging, type MockLogSet } from './logging.js';
 import { configureMockEnvVars, type EnvVarMocker, REQUIRED_ENV_VARS } from './envVars.js';

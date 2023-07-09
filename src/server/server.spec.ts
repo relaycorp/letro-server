@@ -2,17 +2,17 @@ import { jest } from '@jest/globals';
 import pino from 'pino';
 import type { FastifyInstance } from 'fastify';
 
-import { mockSpy } from './testUtils/jest.js';
+import { mockSpy } from '../testUtils/jest.js';
 
 const mockFastify: FastifyInstance = {
   register: mockSpy(jest.fn()),
 } as any;
-jest.unstable_mockModule('./utilities/fastify/server.js', () => ({
+jest.unstable_mockModule('../utilities/fastify/server.js', () => ({
   makeFastify: jest.fn<() => Promise<any>>().mockResolvedValue(mockFastify),
 }));
 
 const { makeServer } = await import('./server.js');
-const { makeFastify } = await import('./utilities/fastify/server.js');
+const { makeFastify } = await import('../utilities/fastify/server.js');
 
 describe('makeServer', () => {
   test('No logger should be passed by default', async () => {
