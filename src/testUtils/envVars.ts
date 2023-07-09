@@ -3,7 +3,7 @@ import envVar from 'env-var';
 
 import { MONGODB_URI } from './db.js';
 
-export interface EnvVarSet {
+interface EnvVarSet {
   readonly [key: string]: string | undefined;
 }
 

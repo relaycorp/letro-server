@@ -1,9 +1,9 @@
 import type { FastifyInstance } from 'fastify';
 
-import { makeLetroTestServer } from '../testUtils/letroServer.js';
+import { makeTestServer } from '../testUtils/server.js';
 
 describe('healthcheck routes', () => {
-  const getTestServerFixture = makeLetroTestServer();
+  const getTestServerFixture = makeTestServer();
   let serverInstance: FastifyInstance;
   beforeEach(() => {
     serverInstance = getTestServerFixture().server;
