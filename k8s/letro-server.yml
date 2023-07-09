@@ -13,7 +13,6 @@ spec:
       containers:
         - name: server
           image: dev.local/letro-server
-          args: [server]
           readinessProbe:
             httpGet:
               path: /
