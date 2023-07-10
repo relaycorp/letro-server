@@ -6,12 +6,13 @@ import type { PluginDone } from '../utilities/fastify/PluginDone.js';
 import { convertMessageToEvent } from '../utilities/eventing/receiver.js';
 import type { MessageSink, MessageSinkHandler } from '../incomingMessageSinks/sinkTypes.js';
 import accountCreation from '../incomingMessageSinks/accounts/accountCreation.js';
+import accountLinking from '../incomingMessageSinks/accounts/accountLinking.js';
 import { Emitter } from '../utilities/eventing/Emitter.js';
 
 const INCOMING_SERVICE_MESSAGE_TYPE =
   'tech.relaycorp.awala.endpoint-internet.incoming-service-message';
 
-const SINKS: MessageSink[] = [accountCreation];
+const SINKS: MessageSink[] = [accountCreation, accountLinking];
 const HANDLER_BY_CONTENT_TYPE: { [contentType: string]: MessageSinkHandler } = SINKS.reduce(
   (acc, sink) => ({ ...acc, [sink.contentType]: sink.handler }),
   {},

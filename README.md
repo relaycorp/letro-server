@@ -22,4 +22,5 @@ Ce-Id: the-id
 Ce-Type: tech.relaycorp.awala.endpoint-internet.incoming-service-message
 Ce-Specversion: 1.0
 Ce-Source: https://example.com/the-source
+
 ```
