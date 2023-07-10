@@ -13,7 +13,7 @@ const INCOMING_SERVICE_MESSAGE_TYPE =
   'tech.relaycorp.awala.endpoint-internet.incoming-service-message';
 
 const SINKS: MessageSink[] = [accountCreation, accountLinking];
-const HANDLER_BY_CONTENT_TYPE: { [contentType: string]: MessageSinkHandler } = SINKS.reduce(
+const HANDLER_BY_TYPE: { [contentType: string]: MessageSinkHandler } = SINKS.reduce(
   (acc, sink) => ({ ...acc, [sink.contentType]: sink.handler }),
   {},
 );
@@ -47,20 +47,17 @@ export default function registerRoutes(
           .send({ message: 'Invalid incoming service message' });
       }
 
-      const serviceMessageContentType = event.datacontenttype!;
-      const handler = HANDLER_BY_CONTENT_TYPE[serviceMessageContentType] as
-        | MessageSinkHandler
-        | undefined;
+      const contentType = event.datacontenttype!;
+      const handler = HANDLER_BY_TYPE[contentType] as MessageSinkHandler | undefined;
       if (handler === undefined) {
         return reply
           .status(HTTP_STATUS_CODES.BAD_REQUEST)
           .send({ message: 'Unsupported service message content type' });
       }
 
-      const sinkLogger = request.log.child({ serviceMessageContentType });
       const context = {
         emitter,
-        logger: sinkLogger,
+        logger: request.log.child({ contentType }),
       };
       const didSucceed = await handler(event, context);
       const responseCode = didSucceed
