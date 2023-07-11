@@ -4,7 +4,7 @@ import type { BaseLogger } from 'pino';
 import { makeFastify } from '../utilities/fastify/server.js';
 
 import healthcheckRoutes from './healthcheck.js';
-import incomingAwalaServiceMessages from './incomingAwalaServiceMessages.js';
+import incomingAwalaServiceMessages from './awalaServiceMessages.js';
 
 const rootRoutes: FastifyPluginCallback<RouteOptions>[] = [
   healthcheckRoutes,

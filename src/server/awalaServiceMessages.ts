@@ -48,8 +48,11 @@ export default function registerRoutes(
       }
 
       const contentType = event.datacontenttype!;
+      const eventAwareLogger = request.log.child({ contentType });
+
       const handler = HANDLER_BY_TYPE[contentType] as MessageSinkHandler | undefined;
       if (handler === undefined) {
+        eventAwareLogger.warn('Unsupported service message content type');
         return reply
           .status(HTTP_STATUS_CODES.BAD_REQUEST)
           .send({ message: 'Unsupported service message content type' });
@@ -57,7 +60,7 @@ export default function registerRoutes(
 
       const context = {
         emitter,
-        logger: request.log.child({ contentType }),
+        logger: eventAwareLogger,
       };
       const didSucceed = await handler(event, context);
       const responseCode = didSucceed
