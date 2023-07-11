@@ -4,14 +4,14 @@ import { makeOutgoingServiceMessage } from '../../utilities/awalaEndpoint.js';
 const accountCreation: MessageSink = {
   contentType: 'application/vnd.relaycorp.letro.account-creation-request',
 
-  async handler(event, { logger, emitter }) {
-    logger.info({ id: event.id }, 'Account creation request received');
+  async handler(message, { logger, emitter }) {
+    logger.info({ sender: message.senderId }, 'Account creation request received');
 
     const outgoingEvent = makeOutgoingServiceMessage({
-      content: event.data as Buffer,
+      content: message.content,
       contentType: 'application/vnd.relaycorp.letro.account-creation-completed',
-      recipientId: event.source,
-      senderId: event.subject!,
+      recipientId: message.senderId,
+      senderId: message.recipientId,
     });
     await emitter.emit(outgoingEvent);
 

@@ -9,6 +9,7 @@ import { mockSpy } from '../testUtils/jest.js';
 import { mockEmitter } from '../testUtils/eventing/mockEmitter.js';
 import { CE_CONTENT_TYPE, CE_DATA, CE_ID, CE_SOURCE } from '../testUtils/eventing/stubs.js';
 import type { MessageSinkHandler } from '../incomingMessageSinks/sinkTypes.js';
+import type { IncomingServiceMessage } from '../utilities/awalaEndpoint.js';
 
 const mockHandler: jest.Mock<MessageSinkHandler> = mockSpy(jest.fn());
 jest.unstable_mockModule('../incomingMessageSinks/accounts/accountCreation.js', () => ({
@@ -20,6 +21,7 @@ const EVENT = new CloudEvent({
   id: CE_ID,
   type: 'tech.relaycorp.awala.endpoint-internet.incoming-service-message',
   source: CE_SOURCE,
+  subject: 'subject',
   datacontenttype: CE_CONTENT_TYPE,
   data: CE_DATA,
 });
@@ -48,6 +50,11 @@ describe('Awala service messages', () => {
 
     expect(response.statusCode).toBe(HTTP_STATUS_CODES.BAD_REQUEST);
     expect(response.json()).toHaveProperty('message', 'Invalid incoming service message');
+    expect(logs).toContainEqual(
+      partialPinoLog('warn', 'Invalid incoming service message', {
+        err: expect.objectContaining({ type: 'Error' }),
+      }),
+    );
   });
 
   test('Unsupported content type should be refused', async () => {
@@ -85,10 +92,16 @@ describe('Awala service messages', () => {
     );
   });
 
-  test('Handler should be passed CloudEvent', async () => {
+  test('Handler should be passed equivalent message', async () => {
     await postEvent(EVENT, server);
 
-    expect(mockHandler).toHaveBeenCalledWith(EVENT, expect.anything());
+    const expectedMessage: IncomingServiceMessage = {
+      senderId: EVENT.source,
+      recipientId: EVENT.subject!,
+      contentType: EVENT.datacontenttype!,
+      content: EVENT.data!,
+    };
+    expect(mockHandler).toHaveBeenCalledWith(expectedMessage, expect.anything());
   });
 
   test('HTTP 204 No Content should be returned if handler returns true', async () => {

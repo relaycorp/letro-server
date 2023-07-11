@@ -8,9 +8,10 @@ import type { MessageSink, MessageSinkHandler } from '../incomingMessageSinks/si
 import accountCreation from '../incomingMessageSinks/accounts/accountCreation.js';
 import accountLinking from '../incomingMessageSinks/accounts/accountLinking.js';
 import { Emitter } from '../utilities/eventing/Emitter.js';
-
-const INCOMING_SERVICE_MESSAGE_TYPE =
-  'tech.relaycorp.awala.endpoint-internet.incoming-service-message';
+import {
+  type IncomingServiceMessage,
+  makeIncomingServiceMessage,
+} from '../utilities/awalaEndpoint.js';
 
 const SINKS: MessageSink[] = [accountCreation, accountLinking];
 const HANDLER_BY_TYPE: { [contentType: string]: MessageSinkHandler } = SINKS.reduce(
@@ -34,14 +35,18 @@ export default function registerRoutes(
     url: '/',
 
     async handler(request, reply) {
-      let event: CloudEventV1<unknown>;
+      let event: CloudEventV1<Buffer>;
       try {
         event = convertMessageToEvent(request.headers, request.body as Buffer);
       } catch {
         return reply.status(HTTP_STATUS_CODES.BAD_REQUEST).send({ message: 'Invalid CloudEvent' });
       }
 
-      if (event.type !== INCOMING_SERVICE_MESSAGE_TYPE) {
+      let message: IncomingServiceMessage;
+      try {
+        message = makeIncomingServiceMessage(event);
+      } catch (err) {
+        request.log.warn({ err }, 'Invalid incoming service message');
         return reply
           .status(HTTP_STATUS_CODES.BAD_REQUEST)
           .send({ message: 'Invalid incoming service message' });
@@ -62,7 +67,7 @@ export default function registerRoutes(
         emitter,
         logger: eventAwareLogger,
       };
-      const didSucceed = await handler(event, context);
+      const didSucceed = await handler(message, context);
       const responseCode = didSucceed
         ? HTTP_STATUS_CODES.NO_CONTENT
         : HTTP_STATUS_CODES.SERVICE_UNAVAILABLE;

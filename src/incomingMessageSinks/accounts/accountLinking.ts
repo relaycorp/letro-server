@@ -1,20 +1,20 @@
 import type { MessageSink } from '../sinkTypes.js';
 import { makeOutgoingServiceMessage } from '../../utilities/awalaEndpoint.js';
 
-const accountCreation: MessageSink = {
+const accountLinking: MessageSink = {
   contentType: 'application/vnd.relaycorp.letro.account-claim-request',
 
-  async handler(event, { logger, emitter }) {
-    logger.info({ id: event.id }, 'Account claim request received');
+  async handler(message, { logger, emitter }) {
+    logger.info({ sender: message.senderId }, 'Account claim request received');
 
-    const { domainName } = JSON.parse((event.data as Buffer).toString());
+    const { domainName } = JSON.parse(message.content.toString());
     const userId = `alice@${domainName}`;
 
     const outgoingEvent = makeOutgoingServiceMessage({
       content: Buffer.from(userId),
       contentType: 'application/vnd.relaycorp.letro.account-claim-completed',
-      recipientId: event.source,
-      senderId: event.subject!,
+      recipientId: message.senderId,
+      senderId: message.recipientId,
     });
     await emitter.emit(outgoingEvent);
 
@@ -22,4 +22,4 @@ const accountCreation: MessageSink = {
   },
 };
 
-export default accountCreation;
+export default accountLinking;

@@ -1,7 +1,7 @@
-import type { CloudEventV1 } from 'cloudevents';
 import type { BaseLogger } from 'pino';
 
 import type { Emitter } from '../utilities/eventing/Emitter.js';
+import type { IncomingServiceMessage } from '../utilities/awalaEndpoint.js';
 
 interface MessageSinkHandlerContext {
   readonly logger: BaseLogger;
@@ -9,7 +9,7 @@ interface MessageSinkHandlerContext {
 }
 
 export type MessageSinkHandler = (
-  event: CloudEventV1<unknown>,
+  message: IncomingServiceMessage,
   context: MessageSinkHandlerContext,
 ) => Promise<boolean>;
 
