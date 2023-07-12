@@ -1,11 +1,14 @@
 import { randomUUID } from 'node:crypto';
 
 import { CloudEvent, type CloudEventV1 } from 'cloudevents';
+import { addMonths } from 'date-fns';
 
 const INCOMING_SERVICE_MESSAGE_TYPE =
   'tech.relaycorp.awala.endpoint-internet.incoming-service-message';
 const OUTGOING_SERVICE_MESSAGE_TYPE =
   'tech.relaycorp.awala.endpoint-internet.outgoing-service-message';
+
+const OUTGOING_MESSAGE_TTL_MONTHS = 6;
 
 interface ServiceMessage {
   readonly senderId: string;
@@ -16,6 +19,7 @@ interface ServiceMessage {
 
 export interface OutgoingServiceMessage extends ServiceMessage {
   readonly parcelId?: string;
+  readonly expiry?: Date;
 }
 
 export type IncomingServiceMessage = ServiceMessage;
@@ -42,9 +46,11 @@ export function makeIncomingServiceMessage(event: CloudEventV1<Buffer>): Incomin
 }
 
 export function makeOutgoingServiceMessage(options: OutgoingServiceMessage): CloudEvent<Buffer> {
+  const expiry = options.expiry ?? addMonths(new Date(), OUTGOING_MESSAGE_TTL_MONTHS);
   return new CloudEvent({
     type: OUTGOING_SERVICE_MESSAGE_TYPE,
     id: options.parcelId ?? randomUUID(),
+    expiry: expiry.toISOString(),
     source: options.senderId,
     subject: options.recipientId,
     datacontenttype: options.contentType,

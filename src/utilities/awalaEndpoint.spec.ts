@@ -1,4 +1,5 @@
 import { CloudEvent } from 'cloudevents';
+import { addMonths, parseISO } from 'date-fns';
 
 import { CE_CONTENT_TYPE, CE_DATA, CE_ID, CE_SOURCE } from '../testUtils/eventing/stubs.js';
 
@@ -102,6 +103,27 @@ describe('makeOutgoingServiceMessage', () => {
       const event = makeOutgoingServiceMessage({ ...message, parcelId: undefined });
 
       expect(event.id).toMatch(/[\da-f-]{36}/u);
+    });
+  });
+
+  describe('Expiry', () => {
+    test('Should be taken from service message if set', () => {
+      const expiry = new Date();
+
+      const event = makeOutgoingServiceMessage({ ...message, expiry });
+
+      expect(parseISO(event.expiry as string)).toMatchObject(expiry);
+    });
+
+    test('Should default to 6 months from now if not set', () => {
+      const beforeDate = new Date();
+
+      const event = makeOutgoingServiceMessage({ ...message, expiry: undefined });
+
+      const afterDate = new Date();
+      const expiry = parseISO(event.expiry as string);
+      expect(expiry).toBeAfterOrEqualTo(addMonths(beforeDate, 6));
+      expect(expiry).toBeBeforeOrEqualTo(addMonths(afterDate, 6));
     });
   });
 
