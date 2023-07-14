@@ -115,15 +115,15 @@ describe('makeOutgoingServiceMessage', () => {
       expect(parseISO(event.expiry as string)).toMatchObject(expiry);
     });
 
-    test('Should default to 6 months from now if not set', () => {
+    test('Should default to 3 months from now if not set', () => {
       const beforeDate = new Date();
 
       const event = makeOutgoingServiceMessage({ ...message, expiry: undefined });
 
       const afterDate = new Date();
       const expiry = parseISO(event.expiry as string);
-      expect(expiry).toBeAfterOrEqualTo(addMonths(beforeDate, 6));
-      expect(expiry).toBeBeforeOrEqualTo(addMonths(afterDate, 6));
+      expect(expiry).toBeAfterOrEqualTo(addMonths(beforeDate, 3));
+      expect(expiry).toBeBeforeOrEqualTo(addMonths(afterDate, 3));
     });
   });
 

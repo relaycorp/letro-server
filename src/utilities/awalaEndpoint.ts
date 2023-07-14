@@ -8,7 +8,7 @@ const INCOMING_SERVICE_MESSAGE_TYPE =
 const OUTGOING_SERVICE_MESSAGE_TYPE =
   'tech.relaycorp.awala.endpoint-internet.outgoing-service-message';
 
-const OUTGOING_MESSAGE_TTL_MONTHS = 6;
+const OUTGOING_MESSAGE_TTL_MONTHS = 3;
 
 interface ServiceMessage {
   readonly senderId: string;
