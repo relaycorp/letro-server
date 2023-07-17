@@ -5,3 +5,7 @@ updates:
   schedule:
     interval: weekly
   versioning-strategy: increase
+- package-ecosystem: bundler
+  directory: "/docs"
+  schedule:
+    interval: weekly

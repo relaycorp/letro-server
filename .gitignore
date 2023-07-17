@@ -5,3 +5,5 @@ src/**.js
 .idea/
 .vscode/
 coverage
+docs/.bundle
+docs/vendor
