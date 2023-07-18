@@ -104,10 +104,6 @@ fun processPairingAuth(
         throw PairingRequestException("Pairing request does not exist ($match)")
     }
     
-    val auth = firstPartyEndpoint.authorizeIndefinitely(
-        match.contactEndpointPublicKey,
-    )
-    
     // Implement some app-specific logic to store the contact's Awala endpoint id, as
     // we'll need it later to (a) complete pairing and (b) send messages to them.
     storeContactAwalaId(
@@ -116,7 +112,9 @@ fun processPairingAuth(
         match.contactEndpointId,
     )
     
-    return auth
+    return firstPartyEndpoint.authorizeIndefinitely(
+        match.contactEndpointPublicKey,
+    )
 }
 ```
 
