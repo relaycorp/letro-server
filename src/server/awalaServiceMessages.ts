@@ -15,12 +15,7 @@ import {
 import pairingRequestTmp from '../incomingMessageSinks/contactPairing/pairingRequestTmp.js';
 import pairingAuthTmp from '../incomingMessageSinks/contactPairing/pairingAuthTmp.js';
 
-const SINKS: MessageSink[] = [
-  accountCreation,
-  accountLinking,
-  pairingRequestTmp,
-  pairingAuthTmp,
-];
+const SINKS: MessageSink[] = [accountCreation, accountLinking, pairingRequestTmp, pairingAuthTmp];
 const HANDLER_BY_TYPE: { [contentType: string]: MessageSinkHandler } = SINKS.reduce(
   (acc, sink) => ({ ...acc, [sink.contentType]: sink.handler }),
   {},

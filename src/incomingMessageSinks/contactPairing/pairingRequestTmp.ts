@@ -7,13 +7,13 @@ import { makeOutgoingServiceMessage } from '../../utilities/awalaEndpoint.js';
 const MATCH_CONTENT_TYPE = 'application/vnd.relaycorp.letro.pairing-match-tmp';
 
 function serialiseMatchContent(
-  targetId: string,
   requesterId: string,
+  targetId: string,
   targetEndpointId: string,
   targetIdKey: Buffer,
 ) {
   const targetIdKeyEncoded = targetIdKey.toString('base64');
-  return Buffer.from(`${targetId},${requesterId},${targetEndpointId},${targetIdKeyEncoded}`);
+  return Buffer.from(`${requesterId},${targetId},${targetEndpointId},${targetIdKeyEncoded}`);
 }
 
 const pairingRequestTmp: MessageSink = {
@@ -56,8 +56,8 @@ const pairingRequestTmp: MessageSink = {
         contentType: MATCH_CONTENT_TYPE,
 
         content: serialiseMatchContent(
-          targetId,
           requesterId,
+          targetId,
           message.senderId,
           matchingRequest.requesterIdKey,
         ),
@@ -70,8 +70,8 @@ const pairingRequestTmp: MessageSink = {
         contentType: MATCH_CONTENT_TYPE,
 
         content: serialiseMatchContent(
-          requesterId,
           targetId,
+          requesterId,
           matchingRequest.requesterEndpointId,
           requesterIdKey,
         ),

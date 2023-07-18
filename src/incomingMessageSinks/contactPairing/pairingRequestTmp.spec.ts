@@ -133,8 +133,8 @@ describe('contactRequestTmp', () => {
 
           // eslint-disable-next-line @typescript-eslint/naming-convention,camelcase
           data_base64: serialiseContactMatch(
-            targetId,
             requesterId,
+            targetId,
             requesterEndpointId,
             targetIdKey,
           ).toString('base64'),
@@ -148,8 +148,8 @@ describe('contactRequestTmp', () => {
 
           // eslint-disable-next-line @typescript-eslint/naming-convention,camelcase
           data_base64: serialiseContactMatch(
-            requesterId,
             targetId,
+            requesterId,
             originalRequesterEndpointId,
             requesterIdKey,
           ).toString('base64'),
