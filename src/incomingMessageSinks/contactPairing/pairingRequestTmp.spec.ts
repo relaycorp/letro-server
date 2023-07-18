@@ -89,6 +89,19 @@ describe('contactRequestTmp', () => {
   });
 
   describe('Matching request', () => {
+    test('Neither request should be left in the DB', async () => {
+      // Request #1: Swap the requester and target
+      await runner(serialiseContactRequest(targetId, requesterId, targetIdKey));
+
+      // Request #2
+      await runner(serialiseContactRequest(requesterId, targetId, requesterIdKey));
+
+      await expect(requestModel.exists({ requesterId, targetId })).resolves.toBeNull();
+      await expect(
+        requestModel.exists({ requesterId: targetId, targetId: requesterId }),
+      ).resolves.toBeNull();
+    });
+
     test('Both peers should get their requests swapped', async () => {
       // Request #1: Swap the requester and target
       const originalRequesterEndpointId = 'originalRequesterEndpointId';

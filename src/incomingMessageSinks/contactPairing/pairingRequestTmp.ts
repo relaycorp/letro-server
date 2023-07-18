@@ -70,6 +70,8 @@ const pairingRequestTmp: MessageSink = {
       });
       await emitter.emit(outgoingRequest2);
 
+      await requestModel.deleteOne({ requesterId, targetId });
+      await requestModel.deleteOne({ requesterId: targetId, targetId: requesterId });
       logger.info({ requesterId, targetId }, 'Contact request matched');
     }
 
