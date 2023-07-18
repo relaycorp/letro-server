@@ -5,7 +5,7 @@ import { bufferToArrayBuffer } from '../../utilities/buffer.js';
 import { makeOutgoingServiceMessage } from '../../utilities/awalaEndpoint.js';
 
 const pairingAuthTmp: MessageSink = {
-  contentType: 'application/vnd.relaycorp.letro.pairing-auth-tmp',
+  contentType: 'application/vnd.relaycorp.letro.pairing-auth',
 
   async handler(message, { logger, emitter }) {
     let connectionParams: PrivateEndpointConnParams;

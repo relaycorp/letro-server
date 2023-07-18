@@ -87,7 +87,7 @@ fun parsePairingMatch(content: ByteArray): PairingMatch {
 This message encapsulates the Awala _connection parameters_ whereby a Letro user (the granter) authorises another user (the grantee) to message them.
 
 - Recipient: Both server and user agent.
-- Content type: `application/vnd.relaycorp.letro.pairing-auth-tmp`.
+- Content type: `application/vnd.relaycorp.letro.pairing-auth`.
 - Content: An Awala endpoint's connection parameters binary. For example, the output from `FirstPartyEndpoint.authorizeIndefinitely()` in the Awala Android SDK.
 
 Building on the pseudocode from the [pairing match](#contact-pairing-match) section, the following pseudocode illustrates how to **generate** the message content above using the Android SDK:
