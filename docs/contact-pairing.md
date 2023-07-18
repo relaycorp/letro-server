@@ -93,7 +93,7 @@ This message encapsulates the Awala _connection parameters_ whereby a Letro user
 Building on the pseudocode from the [pairing match](#contact-pairing-match) section, the following pseudocode illustrates how to **generate** the message content above using the Android SDK:
 
 ```kotlin
-fun processPairingAuth(
+fun generatePairingAuth(
     match: PairingMatch,
     firstPartyEndpoint: FirstPartyEndpoint,
 ): ByteArray {
@@ -118,12 +118,11 @@ fun processPairingAuth(
 }
 ```
 
-Conversely, the following pseudocode illustrates how to **process** such authorisations using the Android SDK:
+Conversely, the following pseudocode illustrates how to **import** such authorisations using the Android SDK:
 
 ```kotlin
-fun processPairingCompletion(connectionParams: ByteArray) {
-    val contactEndpoint =
-        PrivateThirdPartyEndpoint.import(completion.connectionParams)
+fun importPairingAuth(auth: ByteArray) {
+    val contactEndpoint = PrivateThirdPartyEndpoint.import(auth)
     
     // Do whatever you need to mark the pairing as complete. For example:
     val contacts = getContactsByAwalaId(contactEndpoint.nodeId)
