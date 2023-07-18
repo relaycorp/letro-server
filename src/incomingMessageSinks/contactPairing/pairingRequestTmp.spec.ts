@@ -5,7 +5,7 @@ import { partialPinoLog } from '../../testUtils/logging.js';
 import { makeSinkTestRunner } from '../../testUtils/messageSinks.js';
 import { ContactPairingRequest } from '../../models/ContactPairingRequest.model.js';
 
-import contactRequestTmp from './contactRequestTmp.js';
+import pairingRequestTmp from './pairingRequestTmp.js';
 
 function serialiseContactRequest(
   requesterId: string,
@@ -28,7 +28,7 @@ describe('contactRequestTmp', () => {
     senderEndpointId: requesterEndpointId,
     recipientEndpointId: ownEndpointId,
     runner,
-  } = makeSinkTestRunner(contactRequestTmp);
+  } = makeSinkTestRunner(pairingRequestTmp);
 
   let requestModel: ReturnModelType<typeof ContactPairingRequest>;
   beforeEach(() => {
@@ -118,7 +118,7 @@ describe('contactRequestTmp', () => {
         expect.objectContaining<Partial<CloudEventV1<Buffer>>>({
           source: ownEndpointId,
           subject: requesterEndpointId,
-          datacontenttype: contactRequestTmp.contentType,
+          datacontenttype: pairingRequestTmp.contentType,
 
           // eslint-disable-next-line @typescript-eslint/naming-convention,camelcase
           data_base64: serialiseContactRequest(targetId, requesterId, targetIdKey).toString(
@@ -130,7 +130,7 @@ describe('contactRequestTmp', () => {
         expect.objectContaining<Partial<CloudEventV1<Buffer>>>({
           source: ownEndpointId,
           subject: originalRequesterEndpointId,
-          datacontenttype: contactRequestTmp.contentType,
+          datacontenttype: pairingRequestTmp.contentType,
 
           // eslint-disable-next-line @typescript-eslint/naming-convention,camelcase
           data_base64: serialiseContactRequest(requesterId, targetId, requesterIdKey).toString(

@@ -12,8 +12,9 @@ import {
   type IncomingServiceMessage,
   makeIncomingServiceMessage,
 } from '../utilities/awalaEndpoint.js';
+import pairingRequestTmp from '../incomingMessageSinks/contactPairing/pairingRequestTmp.js';
 
-const SINKS: MessageSink[] = [accountCreation, accountLinking];
+const SINKS: MessageSink[] = [accountCreation, accountLinking, pairingRequestTmp];
 const HANDLER_BY_TYPE: { [contentType: string]: MessageSinkHandler } = SINKS.reduce(
   (acc, sink) => ({ ...acc, [sink.contentType]: sink.handler }),
   {},

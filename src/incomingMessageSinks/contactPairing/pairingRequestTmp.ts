@@ -15,7 +15,7 @@ function serialiseContactRequestContent(
   return Buffer.from(`${targetId},${requesterId},${targetIdKeyEncoded}`);
 }
 
-const contactRequestTmp: MessageSink = {
+const pairingRequestTmp: MessageSink = {
   contentType: CONTENT_TYPE,
 
   async handler(message, { logger, emitter, dbConnection }) {
@@ -79,4 +79,4 @@ const contactRequestTmp: MessageSink = {
   },
 };
 
-export default contactRequestTmp;
+export default pairingRequestTmp;
