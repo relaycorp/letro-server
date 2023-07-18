@@ -66,9 +66,10 @@ export default function registerRoutes(
       const context = {
         emitter,
         logger: eventAwareLogger,
+        dbConnection: fastify.mongoose,
       };
-      const didSucceed = await handler(message, context);
-      const responseCode = didSucceed
+      const wasFulfilled = await handler(message, context);
+      const responseCode = wasFulfilled
         ? HTTP_STATUS_CODES.NO_CONTENT
         : HTTP_STATUS_CODES.SERVICE_UNAVAILABLE;
       return reply.code(responseCode).send();

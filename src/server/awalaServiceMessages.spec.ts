@@ -92,6 +92,15 @@ describe('Awala service messages', () => {
     );
   });
 
+  test('Handler should be passed DB connection', async () => {
+    await postEvent(EVENT, server);
+
+    expect(mockHandler).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ dbConnection: expect.anything() }),
+    );
+  });
+
   test('Handler should be passed equivalent message', async () => {
     await postEvent(EVENT, server);
 
