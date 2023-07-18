@@ -4,7 +4,7 @@ import type { MessageSink } from '../sinkTypes.js';
 import { ContactPairingRequest } from '../../models/ContactPairingRequest.model.js';
 import { makeOutgoingServiceMessage } from '../../utilities/awalaEndpoint.js';
 
-const CONTENT_TYPE = 'application/vnd.relaycorp.letro.contact-request-tmp';
+const CONTENT_TYPE = 'application/vnd.relaycorp.letro.contact-pairing-request-tmp';
 
 function serialiseContactRequestContent(
   targetId: string,
