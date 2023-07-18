@@ -4,7 +4,7 @@ import type { MessageSink } from '../sinkTypes.js';
 import { ContactPairingRequest } from '../../models/ContactPairingRequest.model.js';
 import { makeOutgoingServiceMessage } from '../../utilities/awalaEndpoint.js';
 
-const MATCH_CONTENT_TYPE = 'application/vnd.relaycorp.letro.contact-pairing-match-tmp';
+const MATCH_CONTENT_TYPE = 'application/vnd.relaycorp.letro.pairing-match-tmp';
 
 function serialiseMatchContent(
   targetId: string,
@@ -17,7 +17,7 @@ function serialiseMatchContent(
 }
 
 const pairingRequestTmp: MessageSink = {
-  contentType: 'application/vnd.relaycorp.letro.contact-pairing-request-tmp',
+  contentType: 'application/vnd.relaycorp.letro.pairing-request-tmp',
 
   async handler(message, { logger, emitter, dbConnection }) {
     const [requesterId, targetId, requesterIdKeyBase64] = message.content.toString().split(',');

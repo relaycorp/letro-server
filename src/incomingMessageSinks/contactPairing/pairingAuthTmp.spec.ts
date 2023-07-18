@@ -14,7 +14,7 @@ import { addDays } from 'date-fns';
 import { makeSinkTestRunner } from '../../testUtils/messageSinks.js';
 import { partialPinoLog } from '../../testUtils/logging.js';
 
-import pairingCompletionTmp, { PAIRING_COMPLETE_CONTENT_TYPE } from './pairingCompletionTmp.js';
+import pairingAuthTmp, { PAIRING_COMPLETE_CONTENT_TYPE } from './pairingAuthTmp.js';
 
 const granterIdentityKeyPair = await generateRSAKeyPair();
 const granterCert = await issueEndpointCertificate({
@@ -42,7 +42,7 @@ describe('pairingCompletionTmp', () => {
     senderEndpointId,
     recipientEndpointId: ownEndpointId,
     runner,
-  } = makeSinkTestRunner(pairingCompletionTmp);
+  } = makeSinkTestRunner(pairingAuthTmp);
 
   test('Malformed connection params should be refused', async () => {
     await runner(Buffer.from('malformed'));

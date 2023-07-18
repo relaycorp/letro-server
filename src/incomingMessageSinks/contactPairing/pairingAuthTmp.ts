@@ -4,11 +4,10 @@ import type { MessageSink } from '../sinkTypes.js';
 import { bufferToArrayBuffer } from '../../utilities/buffer.js';
 import { makeOutgoingServiceMessage } from '../../utilities/awalaEndpoint.js';
 
-const PAIRING_COMPLETE_CONTENT_TYPE =
-  'application/vnd.relaycorp.letro.contact-pairing-complete-tmp';
+const PAIRING_COMPLETE_CONTENT_TYPE = 'application/vnd.relaycorp.letro.pairing-completion-tmp';
 
-const pairingCompletionTmp: MessageSink = {
-  contentType: 'application/vnd.relaycorp.letro.contact-connection-params-tmp',
+const pairingAuthTmp: MessageSink = {
+  contentType: 'application/vnd.relaycorp.letro.pairing-auth-tmp',
 
   async handler(message, { logger, emitter }) {
     let connectionParams: PrivateEndpointConnParams;
@@ -46,5 +45,5 @@ const pairingCompletionTmp: MessageSink = {
   },
 };
 
-export default pairingCompletionTmp;
+export default pairingAuthTmp;
 export { PAIRING_COMPLETE_CONTENT_TYPE };
