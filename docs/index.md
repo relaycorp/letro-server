@@ -4,7 +4,7 @@ This server is part of a [centralised Awala service](https://awala.network/servi
 
 - VeraId account creation with Relaycorp-operated domains.
 - VeraId account claim with non-Relaycorp-operated domains.
-- Contact pairing using VeraId.
+- [Contact pairing using VeraId](./contact-pairing.md).
 
 This component effectively makes Relaycorp's Letro implementation an [Awala hybrid service](https://awala.network/service-providers/implementation/architecture#hybrid-services), where the core Letro protocol remains [fully decentralised](https://awala.network/service-providers/implementation/architecture#decentralised-service).
 

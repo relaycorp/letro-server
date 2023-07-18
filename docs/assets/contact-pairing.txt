@@ -1,0 +1,21 @@
+title Contact pairing
+
+actor alice@applepie.rocks
+actor bob@tickety.boo
+participant Server
+
+group Phase 1
+alice@applepie.rocks->Server:Pairing request (bob@tickety.boo)
+note over Server:No reciprocal request found
+Server<-bob@tickety.boo:Pairing request (alice@applepie.rocks)
+note over Server:Reciprocal request found
+bob@tickety.boo<-Server:Pairing match (alice@applepie.rocks)
+alice@applepie.rocks<-Server:Pairing match (bob@tickety.boo)
+end
+
+group Phase 2
+bob@tickety.boo->Server:Pairing auth (alice@applepie.rocks)
+alice@applepie.rocks<-Server:Pairing completion (alice@applepie.rocks)
+alice@applepie.rocks->Server:Pairing auth (bob@tickety.boo)
+bob@tickety.boo<-Server:Pairing completion (bob@tickety.boo)
+end
