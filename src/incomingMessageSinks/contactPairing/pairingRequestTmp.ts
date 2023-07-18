@@ -4,19 +4,20 @@ import type { MessageSink } from '../sinkTypes.js';
 import { ContactPairingRequest } from '../../models/ContactPairingRequest.model.js';
 import { makeOutgoingServiceMessage } from '../../utilities/awalaEndpoint.js';
 
-const CONTENT_TYPE = 'application/vnd.relaycorp.letro.contact-pairing-request-tmp';
+const MATCH_CONTENT_TYPE = 'application/vnd.relaycorp.letro.contact-pairing-match-tmp';
 
-function serialiseContactRequestContent(
+function serialiseMatchContent(
   targetId: string,
   requesterId: string,
+  targetEndpointId: string,
   targetIdKey: Buffer,
 ) {
   const targetIdKeyEncoded = targetIdKey.toString('base64');
-  return Buffer.from(`${targetId},${requesterId},${targetIdKeyEncoded}`);
+  return Buffer.from(`${targetId},${requesterId},${targetEndpointId},${targetIdKeyEncoded}`);
 }
 
 const pairingRequestTmp: MessageSink = {
-  contentType: CONTENT_TYPE,
+  contentType: 'application/vnd.relaycorp.letro.contact-pairing-request-tmp',
 
   async handler(message, { logger, emitter, dbConnection }) {
     const [requesterId, targetId, requesterIdKeyBase64] = message.content.toString().split(',');
@@ -52,11 +53,12 @@ const pairingRequestTmp: MessageSink = {
       const outgoingRequest1 = makeOutgoingServiceMessage({
         senderId: message.recipientId,
         recipientId: message.senderId,
-        contentType: CONTENT_TYPE,
+        contentType: MATCH_CONTENT_TYPE,
 
-        content: serialiseContactRequestContent(
+        content: serialiseMatchContent(
           targetId,
           requesterId,
+          message.senderId,
           matchingRequest.requesterIdKey,
         ),
       });
@@ -65,8 +67,14 @@ const pairingRequestTmp: MessageSink = {
       const outgoingRequest2 = makeOutgoingServiceMessage({
         senderId: message.recipientId,
         recipientId: matchingRequest.requesterEndpointId,
-        contentType: CONTENT_TYPE,
-        content: serialiseContactRequestContent(requesterId, targetId, requesterIdKey),
+        contentType: MATCH_CONTENT_TYPE,
+
+        content: serialiseMatchContent(
+          requesterId,
+          targetId,
+          matchingRequest.requesterEndpointId,
+          requesterIdKey,
+        ),
       });
       await emitter.emit(outgoingRequest2);
 
@@ -80,3 +88,4 @@ const pairingRequestTmp: MessageSink = {
 };
 
 export default pairingRequestTmp;
+export { MATCH_CONTENT_TYPE };

@@ -5,7 +5,7 @@ import { partialPinoLog } from '../../testUtils/logging.js';
 import { makeSinkTestRunner } from '../../testUtils/messageSinks.js';
 import { ContactPairingRequest } from '../../models/ContactPairingRequest.model.js';
 
-import pairingRequestTmp from './pairingRequestTmp.js';
+import pairingRequestTmp, { MATCH_CONTENT_TYPE } from './pairingRequestTmp.js';
 
 function serialiseContactRequest(
   requesterId: string,
@@ -13,6 +13,17 @@ function serialiseContactRequest(
   requesterIdKey: Buffer,
 ): Buffer {
   return Buffer.from(`${requesterId},${targetId},${requesterIdKey.toString('base64')}`);
+}
+
+function serialiseContactMatch(
+  requesterId: string,
+  targetId: string,
+  requesterEndpointId: string,
+  requesterIdKey: Buffer,
+): Buffer {
+  return Buffer.from(
+    `${requesterId},${targetId},${requesterEndpointId},${requesterIdKey.toString('base64')}`,
+  );
 }
 
 describe('contactRequestTmp', () => {
@@ -118,24 +129,30 @@ describe('contactRequestTmp', () => {
         expect.objectContaining<Partial<CloudEventV1<Buffer>>>({
           source: ownEndpointId,
           subject: requesterEndpointId,
-          datacontenttype: pairingRequestTmp.contentType,
+          datacontenttype: MATCH_CONTENT_TYPE,
 
           // eslint-disable-next-line @typescript-eslint/naming-convention,camelcase
-          data_base64: serialiseContactRequest(targetId, requesterId, targetIdKey).toString(
-            'base64',
-          ),
+          data_base64: serialiseContactMatch(
+            targetId,
+            requesterId,
+            requesterEndpointId,
+            targetIdKey,
+          ).toString('base64'),
         }),
       );
       expect(event2).toMatchObject(
         expect.objectContaining<Partial<CloudEventV1<Buffer>>>({
           source: ownEndpointId,
           subject: originalRequesterEndpointId,
-          datacontenttype: pairingRequestTmp.contentType,
+          datacontenttype: MATCH_CONTENT_TYPE,
 
           // eslint-disable-next-line @typescript-eslint/naming-convention,camelcase
-          data_base64: serialiseContactRequest(requesterId, targetId, requesterIdKey).toString(
-            'base64',
-          ),
+          data_base64: serialiseContactMatch(
+            requesterId,
+            targetId,
+            originalRequesterEndpointId,
+            requesterIdKey,
+          ).toString('base64'),
         }),
       );
     });
