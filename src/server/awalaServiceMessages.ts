@@ -12,8 +12,10 @@ import {
   type IncomingServiceMessage,
   makeIncomingServiceMessage,
 } from '../utilities/awalaEndpoint.js';
+import pairingRequestTmp from '../incomingMessageSinks/contactPairing/pairingRequestTmp.js';
+import pairingAuthTmp from '../incomingMessageSinks/contactPairing/pairingAuthTmp.js';
 
-const SINKS: MessageSink[] = [accountCreation, accountLinking];
+const SINKS: MessageSink[] = [accountCreation, accountLinking, pairingRequestTmp, pairingAuthTmp];
 const HANDLER_BY_TYPE: { [contentType: string]: MessageSinkHandler } = SINKS.reduce(
   (acc, sink) => ({ ...acc, [sink.contentType]: sink.handler }),
   {},
@@ -66,9 +68,10 @@ export default function registerRoutes(
       const context = {
         emitter,
         logger: eventAwareLogger,
+        dbConnection: fastify.mongoose,
       };
-      const didSucceed = await handler(message, context);
-      const responseCode = didSucceed
+      const wasFulfilled = await handler(message, context);
+      const responseCode = wasFulfilled
         ? HTTP_STATUS_CODES.NO_CONTENT
         : HTTP_STATUS_CODES.SERVICE_UNAVAILABLE;
       return reply.code(responseCode).send();

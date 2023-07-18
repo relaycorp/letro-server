@@ -6,7 +6,9 @@ import { createConnection, type Connection, type ConnectOptions, STATES } from '
 import { deleteModelWithClass } from '@typegoose/typegoose';
 import type { AnyParamConstructor } from '@typegoose/typegoose/lib/types.js';
 
-const MODELS: AnyParamConstructor<any>[] = [];
+import { ContactPairingRequest } from '../models/ContactPairingRequest.model.js';
+
+const MODELS: AnyParamConstructor<any>[] = [ContactPairingRequest];
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,no-underscore-dangle
 const BASE_MONGO_URI = (global as any).__MONGO_URI__ as string;
@@ -34,7 +36,6 @@ export function setUpTestDbConnection(): () => Connection {
     if (connection.readyState === STATES.disconnected) {
       // The test closed the connection, so we shouldn't just reconnect, but also purge TypeGoose'
       // model cache because every item there is bound to the old connection.
-      // eslint-disable-next-line sonarjs/no-empty-collection
       MODELS.forEach(deleteModelWithClass);
       connection = await connect();
     }
