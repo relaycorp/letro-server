@@ -4,7 +4,7 @@ actor alice@applepie.rocks
 actor bob@tickety.boo
 participant Server
 
-group Phase 1
+group Phase 1: Exchange requests
 alice@applepie.rocks->Server:Pairing request (bob@tickety.boo)
 note over Server:No reciprocal request found
 Server<-bob@tickety.boo:Pairing request (alice@applepie.rocks)
@@ -13,7 +13,7 @@ bob@tickety.boo<-Server:Pairing match (alice@applepie.rocks)
 alice@applepie.rocks<-Server:Pairing match (bob@tickety.boo)
 end
 
-group Phase 2
+group Phase 2: Exchange authorisations
 bob@tickety.boo->Server:Pairing auth (alice@applepie.rocks)
 alice@applepie.rocks<-Server:Pairing auth (alice@applepie.rocks)
 alice@applepie.rocks->Server:Pairing auth (bob@tickety.boo)
