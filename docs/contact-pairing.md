@@ -8,7 +8,7 @@ nav_order: 2
 Contact pairing is a two-phase process due to Awala's E2E encryption and pre-authorisation requirements:
 
 1. The two parties exchange [_pairing requests_](#contact-pairing-request), using this server as a broker. The order in which requests are received is irrelevant, as the server will wait until both have been received before forwarding them to each other in the form of [_pairing matches_](#contact-pairing-match).
-2. The two parties exchange [_pairing authorisations_](#contact-pairing-authorisation), using this server as a broker. The order in which authorisations are received is irrelevant because the server will forward them **unmodified** as soon as they are received.
+2. The two parties exchange [_pairing authorisations_](#contact-pairing-authorisation), using this server as a broker. The order in which authorisations are received is irrelevant, as the server will forward them **unmodified** as soon as they are received.
 
 The diagram below illustrates the process above:
 
