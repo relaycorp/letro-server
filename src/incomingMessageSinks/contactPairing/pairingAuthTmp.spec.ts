@@ -14,7 +14,7 @@ import { addDays } from 'date-fns';
 import { makeSinkTestRunner } from '../../testUtils/messageSinks.js';
 import { partialPinoLog } from '../../testUtils/logging.js';
 
-import pairingAuthTmp, { PAIRING_COMPLETE_CONTENT_TYPE } from './pairingAuthTmp.js';
+import pairingAuthTmp from './pairingAuthTmp.js';
 
 const granterIdentityKeyPair = await generateRSAKeyPair();
 const granterCert = await issueEndpointCertificate({
@@ -30,10 +30,6 @@ const pda = await issueDeliveryAuthorization({
   validityEndDate: granterCert.expiryDate,
 });
 const sessionKeyPair = await SessionKeyPair.generate();
-
-function serialiseCompletionContent(granterEndpointId: string, connectionParamsSerialised: Buffer) {
-  return Buffer.from(`${granterEndpointId},${connectionParamsSerialised.toString('base64')}`);
-}
 
 describe('pairingCompletionTmp', () => {
   const {
@@ -90,13 +86,9 @@ describe('pairingCompletionTmp', () => {
       expect.objectContaining<Partial<CloudEventV1<any>>>({
         source: ownEndpointId,
         subject: granteeEndpointId,
-        datacontenttype: PAIRING_COMPLETE_CONTENT_TYPE,
-
+        datacontenttype: pairingAuthTmp.contentType,
         // eslint-disable-next-line @typescript-eslint/naming-convention,camelcase
-        data_base64: serialiseCompletionContent(
-          granterEndpointId,
-          connectionParamsSerialised,
-        ).toString('base64'),
+        data_base64: connectionParamsSerialised.toString('base64'),
       }),
     );
     expect(logs).toContainEqual(

@@ -8,7 +8,7 @@ nav_order: 2
 Contact pairing is a two-phase process due to Awala's E2E encryption and pre-authorisation requirements:
 
 1. The two parties exchange [_pairing requests_](#contact-pairing-request), using this server as a broker. The order in which requests are received is irrelevant, as the server will wait until both have been received before forwarding them to each other in the form of [_pairing matches_](#contact-pairing-match).
-2. The two parties exchange [_pairing connection parameters_](#contact-pairing-authorisation), using this server as a broker. The order in which parameters are received is irrelevant because the server will forward them as soon as they are received in the form of [_pairing completion_](#contact-pairing-completion) messages.
+2. The two parties exchange [_pairing connection parameters_](#contact-pairing-authorisation), using this server as a broker. The order in which parameters are received is irrelevant because the server will forward them **as-is** as soon as they are received.
 
 The diagram below illustrates the process above:
 
@@ -86,39 +86,51 @@ fun parsePairingMatch(content: ByteArray): PairingMatch {
 
 This message encapsulates the Awala _connection parameters_ whereby a Letro user (the granter) authorises another user (the grantee) to message them.
 
-- Recipient: Letro server.
+- Recipient: Both server and user agent.
 - Content type: `application/vnd.relaycorp.letro.pairing-auth-tmp`.
 - Content: An Awala endpoint's connection parameters binary. For example, the output from `FirstPartyEndpoint.authorizeIndefinitely()` in the Awala Android SDK.
 
-Building on the pseudocode from the [pairing match](#contact-pairing-match) section, the following pseudocode illustrates how to generate the message content above using the Android SDK:
+Building on the pseudocode from the [pairing match](#contact-pairing-match) section, the following pseudocode illustrates how to **generate** the message content above using the Android SDK:
 
 ```kotlin
 fun processPairingAuth(
     match: PairingMatch,
     firstPartyEndpoint: FirstPartyEndpoint,
 ): ByteArray {
-    checkContactRequestExists(match.requesterVeraId, match.contactVeraId)
+    // Implement some app-specific logic to check that the pairing request exists.
+    if (!contactRequestExists(match.requesterVeraId, match.contactVeraId)) {
+        // Granting authorisation is a sensitive operation and we shouldn't blindly
+        // trust the server.
+        throw PairingRequestException("Pairing request does not exist ($match)")
+    }
+    
     val auth = firstPartyEndpoint.authorizeIndefinitely(
         match.contactEndpointPublicKey,
     )
+    
+    // Implement some app-specific logic to store the contact's Awala endpoint id, as
+    // we'll need it later to (a) complete pairing and (b) send messages to them.
     storeContactAwalaId(
         match.requesterVeraId,
         match.contactVeraId,
         match.contactEndpointId,
     )
+    
     return auth
 }
 ```
 
-### Contact pairing completion
+Conversely, the following pseudocode illustrates how to **process** such authorisations using the Android SDK:
 
-This message signifies the completion of one of the two sides of the pairing process. The server will send this message to the grantee of an [authorisation](#contact-pairing-authorisation).
-
-- Recipient: Letro user agent.
-- Content type: `application/vnd.relaycorp.letro.pairing-completion-tmp`.
-- Content: A comma-separated, UTF-8 string containing: The granter's Awala endpoint id (e.g., `055be8417a3d1dad19799e66596ac085fd5c68f0b1dbd9bfea5e39c072dd3cf88`) and the respective connection parameters from the [authorisation](#contact-pairing-authorisation) message (base64-encoded). For example (whitespace for readability purposes only):
-
-  ```
-  055be8417a3d1dad19799e66596ac085fd5c68f0b1dbd9bfea5e39c072dd3cf88,
-  <connection parameters, base64-encoded>
-  ```
+```kotlin
+fun processPairingCompletion(connectionParams: ByteArray) {
+    val contactEndpoint =
+        PrivateThirdPartyEndpoint.import(completion.connectionParams)
+    
+    // Do whatever you need to mark the pairing as complete. For example:
+    val contacts = getContactsByAwalaId(contactEndpoint.nodeId)
+    for (contact in contacts) {
+        contact.markPairingAsComplete()
+    }
+}
+```

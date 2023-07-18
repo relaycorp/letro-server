@@ -4,8 +4,6 @@ import type { MessageSink } from '../sinkTypes.js';
 import { bufferToArrayBuffer } from '../../utilities/buffer.js';
 import { makeOutgoingServiceMessage } from '../../utilities/awalaEndpoint.js';
 
-const PAIRING_COMPLETE_CONTENT_TYPE = 'application/vnd.relaycorp.letro.pairing-completion-tmp';
-
 const pairingAuthTmp: MessageSink = {
   contentType: 'application/vnd.relaycorp.letro.pairing-auth-tmp',
 
@@ -34,8 +32,8 @@ const pairingAuthTmp: MessageSink = {
     const completionEvent = makeOutgoingServiceMessage({
       senderId: message.recipientId,
       recipientId: granteeId,
-      contentType: PAIRING_COMPLETE_CONTENT_TYPE,
-      content: Buffer.from(`${granterId},${message.content.toString('base64')}`),
+      contentType: message.contentType,
+      content: message.content,
     });
     await emitter.emit(completionEvent);
 
@@ -46,4 +44,3 @@ const pairingAuthTmp: MessageSink = {
 };
 
 export default pairingAuthTmp;
-export { PAIRING_COMPLETE_CONTENT_TYPE };
