@@ -1,26 +1,64 @@
-import { getModelForClass } from '@typegoose/typegoose';
+import { getModelForClass, type ReturnModelType } from '@typegoose/typegoose';
 
 import type { MessageSink } from '../sinkTypes.js';
 import { ContactPairingRequest } from '../../models/ContactPairingRequest.model.js';
 import { makeOutgoingServiceMessage } from '../../utilities/awalaEndpoint.js';
+import type { Emitter } from '../../utilities/eventing/Emitter.js';
 
 const MATCH_CONTENT_TYPE = 'application/vnd.relaycorp.letro.pairing-match-tmp';
 
 function serialiseMatchContent(
-  requesterId: string,
-  targetId: string,
+  requesterVeraId: string,
+  targetVeraId: string,
   targetEndpointId: string,
   targetIdKey: Buffer,
 ) {
   const targetIdKeyEncoded = targetIdKey.toString('base64');
-  return Buffer.from(`${requesterId},${targetId},${targetEndpointId},${targetIdKeyEncoded}`);
+  return Buffer.from(
+    `${requesterVeraId},${targetVeraId},${targetEndpointId},${targetIdKeyEncoded}`,
+  );
+}
+
+interface Requester {
+  readonly endpointId: string;
+  readonly veraId: string;
+}
+
+interface Target {
+  readonly endpointIdKey: Buffer;
+  readonly veraId: string;
+}
+
+async function processMatch(
+  requester: Requester,
+  target: Target,
+  ownEndpointId: string,
+  emitter: Emitter<unknown>,
+  requestModel: ReturnModelType<typeof ContactPairingRequest>,
+) {
+  const matchMessage = makeOutgoingServiceMessage({
+    senderId: ownEndpointId,
+    recipientId: requester.endpointId,
+    contentType: MATCH_CONTENT_TYPE,
+
+    content: serialiseMatchContent(
+      requester.veraId,
+      target.veraId,
+      requester.endpointId,
+      target.endpointIdKey,
+    ),
+  });
+  await emitter.emit(matchMessage);
+  await requestModel.deleteOne({ requesterVeraId: requester.veraId, targetVeraId: target.veraId });
 }
 
 const pairingRequestTmp: MessageSink = {
   contentType: 'application/vnd.relaycorp.letro.pairing-request-tmp',
 
   async handler(message, { logger, emitter, dbConnection }) {
-    const [requesterId, targetId, requesterIdKeyBase64] = message.content.toString().split(',');
+    const [requesterVeraId, targetVeraId, requesterIdKeyBase64] = message.content
+      .toString()
+      .split(',');
     if (!requesterIdKeyBase64) {
       logger.info('Refused malformed request containing fewer than 3 fields');
       return true;
@@ -34,53 +72,43 @@ const pairingRequestTmp: MessageSink = {
     // for a match first in case the two matching requests are received in quick succession.
     const requesterIdKey = Buffer.from(requesterIdKeyBase64, 'base64');
     await requestModel.updateOne(
-      { requesterId, targetId },
+      { requesterVeraId, targetVeraId },
       {
-        requesterId,
-        targetId,
+        requesterVeraId,
+        targetVeraId,
         requesterEndpointId: message.senderId,
         requesterIdKey,
       },
       { upsert: true },
     );
-    logger.info({ requesterId, targetId }, 'Contact request created or updated');
 
     const matchingRequest = await requestModel.findOne({
-      requesterId: targetId,
-      targetId: requesterId,
+      requesterVeraId: targetVeraId,
+      targetVeraId: requesterVeraId,
     });
     if (matchingRequest) {
-      const outgoingRequest1 = makeOutgoingServiceMessage({
-        senderId: message.recipientId,
-        recipientId: message.senderId,
-        contentType: MATCH_CONTENT_TYPE,
+      await processMatch(
+        { endpointId: message.senderId, veraId: requesterVeraId },
+        { endpointIdKey: matchingRequest.requesterIdKey, veraId: targetVeraId },
+        message.recipientId,
+        emitter,
+        requestModel,
+      );
 
-        content: serialiseMatchContent(
-          requesterId,
-          targetId,
-          message.senderId,
-          matchingRequest.requesterIdKey,
-        ),
-      });
-      await emitter.emit(outgoingRequest1);
+      await processMatch(
+        {
+          endpointId: matchingRequest.requesterEndpointId,
+          veraId: matchingRequest.requesterVeraId,
+        },
+        { endpointIdKey: requesterIdKey, veraId: matchingRequest.targetVeraId },
+        message.recipientId,
+        emitter,
+        requestModel,
+      );
 
-      const outgoingRequest2 = makeOutgoingServiceMessage({
-        senderId: message.recipientId,
-        recipientId: matchingRequest.requesterEndpointId,
-        contentType: MATCH_CONTENT_TYPE,
-
-        content: serialiseMatchContent(
-          targetId,
-          requesterId,
-          matchingRequest.requesterEndpointId,
-          requesterIdKey,
-        ),
-      });
-      await emitter.emit(outgoingRequest2);
-
-      await requestModel.deleteOne({ requesterId, targetId });
-      await requestModel.deleteOne({ requesterId: targetId, targetId: requesterId });
-      logger.info({ requesterId, targetId }, 'Contact request matched');
+      logger.info({ requesterVeraId, targetVeraId }, 'Contact request matched');
+    } else {
+      logger.info({ requesterVeraId, targetVeraId }, 'Contact request created or updated');
     }
 
     return true;
