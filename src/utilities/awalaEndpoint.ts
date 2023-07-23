@@ -22,7 +22,9 @@ export interface OutgoingServiceMessage extends ServiceMessage {
   readonly expiry?: Date;
 }
 
-export type IncomingServiceMessage = ServiceMessage;
+export interface IncomingServiceMessage extends ServiceMessage {
+  readonly parcelId: string;
+}
 
 export function makeIncomingServiceMessage(event: CloudEventV1<Buffer>): IncomingServiceMessage {
   if (event.type !== INCOMING_SERVICE_MESSAGE_TYPE) {
@@ -38,6 +40,7 @@ export function makeIncomingServiceMessage(event: CloudEventV1<Buffer>): Incomin
     throw new Error('Missing event data');
   }
   return {
+    parcelId: event.id,
     senderId: event.source,
     recipientId: event.subject,
     contentType: event.datacontenttype,

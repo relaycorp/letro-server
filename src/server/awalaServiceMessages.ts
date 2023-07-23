@@ -54,12 +54,12 @@ export default function registerRoutes(
           .send({ message: 'Invalid incoming service message' });
       }
 
-      const contentType = event.datacontenttype!;
-      const eventAwareLogger = request.log.child({ contentType });
+      const parcelAwareLogger = request.log.child({ parcelId: message.parcelId });
 
+      const contentType = event.datacontenttype!;
       const handler = HANDLER_BY_TYPE[contentType] as MessageSinkHandler | undefined;
       if (handler === undefined) {
-        eventAwareLogger.warn('Unsupported service message content type');
+        parcelAwareLogger.warn({ contentType }, 'Unsupported service message content type');
         return reply
           .status(HTTP_STATUS_CODES.BAD_REQUEST)
           .send({ message: 'Unsupported service message content type' });
@@ -67,7 +67,7 @@ export default function registerRoutes(
 
       const context = {
         emitter,
-        logger: eventAwareLogger,
+        logger: parcelAwareLogger,
         dbConnection: fastify.mongoose,
       };
       const wasFulfilled = await handler(message, context);
