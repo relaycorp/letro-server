@@ -147,6 +147,9 @@ describe('contactRequestTmp', () => {
           ).toString('base64'),
         }),
       );
+      expect(logs).toContainEqual(
+        partialPinoLog('debug', 'Pairing match sent', { peerId: requesterEndpointId }),
+      );
       expect(event2).toMatchObject(
         expect.objectContaining<Partial<CloudEventV1<Buffer>>>({
           source: ownEndpointId,
@@ -161,6 +164,9 @@ describe('contactRequestTmp', () => {
             requesterIdKey,
           ).toString('base64'),
         }),
+      );
+      expect(logs).toContainEqual(
+        partialPinoLog('debug', 'Pairing match sent', { peerId: originalRequesterEndpointId }),
       );
     });
 

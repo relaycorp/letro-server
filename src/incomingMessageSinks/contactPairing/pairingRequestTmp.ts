@@ -1,4 +1,5 @@
 import { getModelForClass, type ReturnModelType } from '@typegoose/typegoose';
+import type { BaseLogger } from 'pino';
 
 import type { MessageSink } from '../sinkTypes.js';
 import { ContactPairingRequest } from '../../models/ContactPairingRequest.model.js';
@@ -35,6 +36,7 @@ async function processMatch(
   ownEndpointId: string,
   emitter: Emitter<unknown>,
   requestModel: ReturnModelType<typeof ContactPairingRequest>,
+  logger: BaseLogger,
 ) {
   const matchMessage = makeOutgoingServiceMessage({
     senderId: ownEndpointId,
@@ -50,6 +52,7 @@ async function processMatch(
   });
   await emitter.emit(matchMessage);
   await requestModel.deleteOne({ requesterVeraId: requester.veraId, targetVeraId: target.veraId });
+  logger.debug({ peerId: requester.endpointId, parcelId: matchMessage.id }, 'Pairing match sent');
 }
 
 const pairingRequestTmp: MessageSink = {
@@ -93,6 +96,7 @@ const pairingRequestTmp: MessageSink = {
         message.recipientId,
         emitter,
         requestModel,
+        logger,
       );
 
       await processMatch(
@@ -104,6 +108,7 @@ const pairingRequestTmp: MessageSink = {
         message.recipientId,
         emitter,
         requestModel,
+        logger,
       );
 
       logger.info({ requesterVeraId, targetVeraId }, 'Contact request matched');
