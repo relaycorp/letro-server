@@ -20,19 +20,18 @@ function serialiseMatchContent(
   );
 }
 
-interface Requester {
+interface PairingPeer {
   readonly endpointId: string;
   readonly veraId: string;
 }
 
-interface Target {
+interface PairingPeerTarget extends PairingPeer {
   readonly endpointIdKey: Buffer;
-  readonly veraId: string;
 }
 
 async function processMatch(
-  requester: Requester,
-  target: Target,
+  requester: PairingPeer,
+  target: PairingPeerTarget,
   ownEndpointId: string,
   emitter: Emitter<unknown>,
   requestModel: ReturnModelType<typeof ContactPairingRequest>,
@@ -46,7 +45,7 @@ async function processMatch(
     content: serialiseMatchContent(
       requester.veraId,
       target.veraId,
-      requester.endpointId,
+      target.endpointId,
       target.endpointIdKey,
     ),
   });
@@ -92,7 +91,11 @@ const pairingRequestTmp: MessageSink = {
     if (matchingRequest) {
       await processMatch(
         { endpointId: message.senderId, veraId: requesterVeraId },
-        { endpointIdKey: matchingRequest.requesterIdKey, veraId: targetVeraId },
+        {
+          endpointId: matchingRequest.requesterEndpointId,
+          endpointIdKey: matchingRequest.requesterIdKey,
+          veraId: targetVeraId,
+        },
         message.recipientId,
         emitter,
         requestModel,
@@ -104,7 +107,11 @@ const pairingRequestTmp: MessageSink = {
           endpointId: matchingRequest.requesterEndpointId,
           veraId: matchingRequest.requesterVeraId,
         },
-        { endpointIdKey: requesterIdKey, veraId: matchingRequest.targetVeraId },
+        {
+          endpointId: message.senderId,
+          endpointIdKey: requesterIdKey,
+          veraId: matchingRequest.targetVeraId,
+        },
         message.recipientId,
         emitter,
         requestModel,

@@ -142,7 +142,7 @@ describe('contactRequestTmp', () => {
           data_base64: serialiseContactMatch(
             requesterVeraId,
             targetVeraId,
-            requesterEndpointId,
+            originalRequesterEndpointId,
             targetIdKey,
           ).toString('base64'),
         }),
@@ -160,7 +160,7 @@ describe('contactRequestTmp', () => {
           data_base64: serialiseContactMatch(
             targetVeraId,
             requesterVeraId,
-            originalRequesterEndpointId,
+            requesterEndpointId,
             requesterIdKey,
           ).toString('base64'),
         }),
