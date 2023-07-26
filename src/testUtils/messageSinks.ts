@@ -40,6 +40,7 @@ export function makeSinkTestRunner(sink: MessageSink): TestRunnerContext {
       await expect(
         sink.handler(
           {
+            parcelId: 'parcel id',
             senderId: options?.senderEndpointId ?? senderEndpointId,
             recipientId: recipientEndpointId,
             contentType: sink.contentType,

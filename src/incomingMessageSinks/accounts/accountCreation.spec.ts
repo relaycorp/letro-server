@@ -13,6 +13,7 @@ describe('accountCreation handler', () => {
     await expect(
       accountCreation.handler(
         {
+          parcelId: 'parcel id',
           senderId: 'sender',
           recipientId: 'recipient',
           contentType: accountCreation.contentType,

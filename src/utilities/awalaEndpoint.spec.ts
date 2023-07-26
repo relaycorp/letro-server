@@ -31,6 +31,12 @@ describe('makeIncomingServiceMessage', () => {
     expect(message.senderId).toBe(event.source);
   });
 
+  test('Parcel id should be taken from event id', () => {
+    const message = makeIncomingServiceMessage(event);
+
+    expect(message.parcelId).toBe(event.id);
+  });
+
   describe('Recipient', () => {
     test('Should be taken from event subject', () => {
       const message = makeIncomingServiceMessage(event);

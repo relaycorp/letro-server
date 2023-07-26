@@ -8,28 +8,30 @@ import { ContactPairingRequest } from '../../models/ContactPairingRequest.model.
 import pairingRequestTmp, { MATCH_CONTENT_TYPE } from './pairingRequestTmp.js';
 
 function serialiseContactRequest(
-  requesterId: string,
-  targetId: string,
+  requesterVeraId: string,
+  targetVeraId: string,
   requesterIdKey: Buffer,
 ): Buffer {
-  return Buffer.from(`${requesterId},${targetId},${requesterIdKey.toString('base64')}`);
+  return Buffer.from(`${requesterVeraId},${targetVeraId},${requesterIdKey.toString('base64')}`);
 }
 
 function serialiseContactMatch(
-  requesterId: string,
-  targetId: string,
+  requesterVeraId: string,
+  targetVeraId: string,
   requesterEndpointId: string,
   requesterIdKey: Buffer,
 ): Buffer {
   return Buffer.from(
-    `${requesterId},${targetId},${requesterEndpointId},${requesterIdKey.toString('base64')}`,
+    `${requesterVeraId},${targetVeraId},${requesterEndpointId},${requesterIdKey.toString(
+      'base64',
+    )}`,
   );
 }
 
 describe('contactRequestTmp', () => {
-  const requesterId = 'requester@example.com';
+  const requesterVeraId = 'requester@example.com';
   const requesterIdKey = Buffer.from('requesterIdKey');
-  const targetId = 'target@foo.bar';
+  const targetVeraId = 'target@foo.bar';
   const targetIdKey = Buffer.from('targetIdKey');
 
   const {
@@ -58,42 +60,47 @@ describe('contactRequestTmp', () => {
 
   describe('Non-matching request', () => {
     test('Request should be created if it does not exist', async () => {
-      await runner(serialiseContactRequest(requesterId, targetId, requesterIdKey));
+      await runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey));
 
       await expect(
-        requestModel.exists({ requesterId, targetId, requesterEndpointId, requesterIdKey }),
+        requestModel.exists({ requesterVeraId, targetVeraId, requesterEndpointId, requesterIdKey }),
       ).resolves.not.toBeNull();
       expect(logs).toContainEqual(
         partialPinoLog('info', 'Contact request created or updated', {
-          requesterId,
-          targetId,
+          requesterVeraId,
+          targetVeraId,
         }),
       );
     });
 
     test('Request should be updated if it exists', async () => {
       // Request #1
-      await runner(serialiseContactRequest(requesterId, targetId, requesterIdKey));
+      await runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey));
 
       // Request #2
       const requesterIdKey2 = Buffer.concat([requesterIdKey, Buffer.from('2')]);
-      await runner(serialiseContactRequest(requesterId, targetId, requesterIdKey2));
+      await runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey2));
 
       await expect(
-        requestModel.exists({ requesterId, targetId, requesterEndpointId, requesterIdKey }),
+        requestModel.exists({
+          requesterVeraId,
+          targetVeraId,
+          requesterEndpointId,
+          requesterIdKey,
+        }),
       ).resolves.toBeNull();
       await expect(
         requestModel.exists({
-          requesterId,
-          targetId,
+          requesterVeraId,
+          targetVeraId,
           requesterEndpointId,
           requesterIdKey: requesterIdKey2,
         }),
       ).resolves.not.toBeNull();
       expect(logs).toContainEqual(
         partialPinoLog('info', 'Contact request created or updated', {
-          requesterId,
-          targetId,
+          requesterVeraId,
+          targetVeraId,
         }),
       );
     });
@@ -102,26 +109,26 @@ describe('contactRequestTmp', () => {
   describe('Matching request', () => {
     test('Neither request should be left in the DB', async () => {
       // Request #1: Swap the requester and target
-      await runner(serialiseContactRequest(targetId, requesterId, targetIdKey));
+      await runner(serialiseContactRequest(targetVeraId, requesterVeraId, targetIdKey));
 
       // Request #2
-      await runner(serialiseContactRequest(requesterId, targetId, requesterIdKey));
+      await runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey));
 
-      await expect(requestModel.exists({ requesterId, targetId })).resolves.toBeNull();
+      await expect(requestModel.exists({ requesterVeraId, targetVeraId })).resolves.toBeNull();
       await expect(
-        requestModel.exists({ requesterId: targetId, targetId: requesterId }),
+        requestModel.exists({ requesterVeraId: targetVeraId, targetVeraId: requesterVeraId }),
       ).resolves.toBeNull();
     });
 
     test('Both peers should get their requests swapped', async () => {
       // Request #1: Swap the requester and target
       const originalRequesterEndpointId = 'originalRequesterEndpointId';
-      await runner(serialiseContactRequest(targetId, requesterId, targetIdKey), {
+      await runner(serialiseContactRequest(targetVeraId, requesterVeraId, targetIdKey), {
         senderEndpointId: originalRequesterEndpointId,
       });
 
       // Request #2
-      await runner(serialiseContactRequest(requesterId, targetId, requesterIdKey));
+      await runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey));
 
       expect(emittedEvents).toHaveLength(2);
       const [event1, event2] = emittedEvents;
@@ -133,12 +140,15 @@ describe('contactRequestTmp', () => {
 
           // eslint-disable-next-line @typescript-eslint/naming-convention,camelcase
           data_base64: serialiseContactMatch(
-            requesterId,
-            targetId,
-            requesterEndpointId,
+            requesterVeraId,
+            targetVeraId,
+            originalRequesterEndpointId,
             targetIdKey,
           ).toString('base64'),
         }),
+      );
+      expect(logs).toContainEqual(
+        partialPinoLog('debug', 'Pairing match sent', { peerId: requesterEndpointId }),
       );
       expect(event2).toMatchObject(
         expect.objectContaining<Partial<CloudEventV1<Buffer>>>({
@@ -148,26 +158,29 @@ describe('contactRequestTmp', () => {
 
           // eslint-disable-next-line @typescript-eslint/naming-convention,camelcase
           data_base64: serialiseContactMatch(
-            targetId,
-            requesterId,
-            originalRequesterEndpointId,
+            targetVeraId,
+            requesterVeraId,
+            requesterEndpointId,
             requesterIdKey,
           ).toString('base64'),
         }),
+      );
+      expect(logs).toContainEqual(
+        partialPinoLog('debug', 'Pairing match sent', { peerId: originalRequesterEndpointId }),
       );
     });
 
     test('Match should be logged', async () => {
       // Request #1: Swap the requester and target
-      await runner(serialiseContactRequest(targetId, requesterId, targetIdKey));
+      await runner(serialiseContactRequest(targetVeraId, requesterVeraId, targetIdKey));
 
       // Request #2
-      await runner(serialiseContactRequest(requesterId, targetId, requesterIdKey));
+      await runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey));
 
       expect(logs).toContainEqual(
         partialPinoLog('info', 'Contact request matched', {
-          requesterId,
-          targetId,
+          requesterVeraId,
+          targetVeraId,
         }),
       );
     });

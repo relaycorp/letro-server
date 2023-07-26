@@ -13,6 +13,7 @@ describe('accountLinking handler', () => {
     await expect(
       accountLinking.handler(
         {
+          parcelId: 'parcel id',
           senderId: 'sender',
           recipientId: 'recipient',
           contentType: accountLinking.contentType,

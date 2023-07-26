@@ -4,7 +4,7 @@ import { secondsInDay } from 'date-fns';
 const TTL_DAYS = 90;
 const TTL_SECONDS = secondsInDay * TTL_DAYS;
 
-@index({ requesterId: 1, targetId: 1 }, { unique: true })
+@index({ requesterVeraId: 1, targetVeraId: 1 }, { unique: true })
 @modelOptions({ schemaOptions: { timestamps: { createdAt: 'creationDate', updatedAt: false } } })
 @index({ creationDate: 1 }, { expireAfterSeconds: TTL_SECONDS })
 export class ContactPairingRequest {
@@ -12,13 +12,13 @@ export class ContactPairingRequest {
    * The VeraId of the requester (e.g., `alice@example.com`).
    */
   @prop({ required: true })
-  public requesterId!: string;
+  public requesterVeraId!: string;
 
   /**
    * The VeraId of the target (e.g., `bob@example.com`).
    */
   @prop({ required: true })
-  public targetId!: string;
+  public targetVeraId!: string;
 
   /**
    * The requester's Awala endpoint id.
