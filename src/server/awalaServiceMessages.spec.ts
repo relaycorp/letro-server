@@ -66,7 +66,10 @@ describe('Awala service messages', () => {
     expect(response.statusCode).toBe(HTTP_STATUS_CODES.BAD_REQUEST);
     expect(response.json()).toHaveProperty('message', 'Unsupported service message content type');
     expect(logs).toContainEqual(
-      partialPinoLog('warn', 'Unsupported service message content type', { contentType }),
+      partialPinoLog('warn', 'Unsupported service message content type', {
+        contentType,
+        parcelId: EVENT.id,
+      }),
     );
   });
 
@@ -105,6 +108,7 @@ describe('Awala service messages', () => {
     await postEvent(EVENT, server);
 
     const expectedMessage: IncomingServiceMessage = {
+      parcelId: EVENT.id,
       senderId: EVENT.source,
       recipientId: EVENT.subject!,
       contentType: EVENT.datacontenttype!,
