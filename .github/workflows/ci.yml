@@ -9,6 +9,6 @@ jobs:
     with:
       docker_image_local_name: dev.local/letro-server
       dockerhub_username: ${{ vars.DOCKERHUB_USERNAME }}
-      kubernetes_app_name: letro-server
+      knative_eventing_enabled: false
     secrets:
       dockerhub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
