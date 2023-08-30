@@ -13,4 +13,5 @@ Awala endpoint backend backing Letro's centralised service
   - `MONGODB_DB` (optional): The name of the MongoDB database (e.g., `awala-endpoint`).
   - `MONGODB_USER` (optional): The username to connect to MongoDB (e.g., `alice`).
   - `MONGODB_PASSWORD` (optional): The password to connect to MongoDB (e.g., `s3cr3t`).
-
+- VeraId Authority variables:
+  - `VAUTH_API_URL` (required): The URL of the VeraId Authority API.
