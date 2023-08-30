@@ -1,7 +1,7 @@
 import { getModelForClass, type ReturnModelType } from '@typegoose/typegoose';
 import type { BaseLogger } from 'pino';
 
-import type { MessageSink } from '../sinkTypes.js';
+import type { MessageSink } from '../types.js';
 import { ContactPairingRequest } from '../../models/ContactPairingRequest.model.js';
 import { makeOutgoingServiceMessage } from '../../utilities/awalaEndpoint.js';
 import type { Emitter } from '../../utilities/eventing/Emitter.js';

@@ -1,7 +1,7 @@
 import type { CloudEvent } from 'cloudevents';
 import type { Connection } from 'mongoose';
 
-import type { MessageSink } from '../incomingMessageSinks/sinkTypes.js';
+import type { MessageSink } from '../sinks/types.js';
 
 import { type MockLogSet, makeMockLogging } from './logging.js';
 import { mockEmitter } from './eventing/mockEmitter.js';

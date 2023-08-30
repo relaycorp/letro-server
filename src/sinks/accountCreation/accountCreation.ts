@@ -1,4 +1,4 @@
-import type { MessageSink } from '../sinkTypes.js';
+import type { MessageSink } from '../types.js';
 import { makeOutgoingServiceMessage } from '../../utilities/awalaEndpoint.js';
 
 const accountCreation: MessageSink = {

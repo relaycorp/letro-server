@@ -4,16 +4,16 @@ import type { FastifyInstance, RouteOptions } from 'fastify';
 import { HTTP_STATUS_CODES } from '../utilities/http.js';
 import type { PluginDone } from '../utilities/fastify/PluginDone.js';
 import { convertMessageToEvent } from '../utilities/eventing/receiver.js';
-import type { MessageSink, MessageSinkHandler } from '../incomingMessageSinks/sinkTypes.js';
-import accountCreation from '../incomingMessageSinks/accounts/accountCreation.js';
-import accountLinking from '../incomingMessageSinks/accounts/accountLinking.js';
+import type { MessageSink, MessageSinkHandler } from '../sinks/types.js';
+import accountCreation from '../sinks/accountCreation/accountCreation.js';
+import accountLinking from '../sinks/accountLinking/accountLinking.js';
 import { Emitter } from '../utilities/eventing/Emitter.js';
 import {
   type IncomingServiceMessage,
   makeIncomingServiceMessage,
 } from '../utilities/awalaEndpoint.js';
-import pairingRequestTmp from '../incomingMessageSinks/contactPairing/pairingRequestTmp.js';
-import pairingAuthTmp from '../incomingMessageSinks/contactPairing/pairingAuthTmp.js';
+import pairingRequestTmp from '../sinks/contactPairing/pairingRequestTmp.js';
+import pairingAuthTmp from '../sinks/contactPairing/pairingAuthTmp.js';
 
 const SINKS: MessageSink[] = [accountCreation, accountLinking, pairingRequestTmp, pairingAuthTmp];
 const HANDLER_BY_TYPE: { [contentType: string]: MessageSinkHandler } = SINKS.reduce(
