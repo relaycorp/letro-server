@@ -1,5 +1,6 @@
 import { type Compute, GoogleAuth } from 'google-auth-library';
-import moize from 'moize';
+// eslint-disable-next-line import/extensions
+import moize from 'moize/mjs/index.mjs';
 import { minutesToMilliseconds } from 'date-fns';
 
 const googleAuth = new GoogleAuth();

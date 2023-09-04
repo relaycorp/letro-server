@@ -3,11 +3,11 @@ import { jest } from '@jest/globals';
 import envVar from 'env-var';
 
 import { configureMockEnvVars } from '../../testUtils/envVars.js';
+import { VAUTH_TOKEN, VAUTH_API_URL } from '../../testUtils/veraidAuth/stubs.js';
 
 import { Command } from './Command.js';
 
-const TOKEN = 'the token';
-const mockGetGoogleIdToken = jest.fn<() => Promise<string>>().mockResolvedValue(TOKEN);
+const mockGetGoogleIdToken = jest.fn<() => Promise<string>>().mockResolvedValue(VAUTH_TOKEN);
 jest.unstable_mockModule('../googleAuthn.js', () => ({
   getGoogleIdToken: mockGetGoogleIdToken,
 }));
@@ -22,8 +22,6 @@ jest.unstable_mockModule('@relaycorp/veraid-authority', () => ({
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const { VeraidAuthClient } = await import('./VeraidAuthClient.js');
-
-const VAUTH_API_URL = 'https://veraid-auth.example.com';
 
 class MockCommand extends Command<string> {
   public callClient: MockAuthorityClient | null = null;
@@ -79,7 +77,7 @@ describe('VeraidAuthClient', () => {
 
       await authority.run(command);
 
-      expect(command.callClient!.authHeader).toHaveProperty('parameters', TOKEN);
+      expect(command.callClient!.authHeader).toHaveProperty('parameters', VAUTH_TOKEN);
     });
 
     test('Client should use token of type Bearer', async () => {

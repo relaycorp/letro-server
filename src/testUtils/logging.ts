@@ -1,4 +1,4 @@
-import pino, { type LogDescriptor } from 'pino';
+import { pino, type LogDescriptor } from 'pino';
 import split2 from 'split2';
 
 type MockLogSet = object[];

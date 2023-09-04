@@ -1,6 +1,6 @@
 import { getPinoOptions, type LoggingTarget } from '@relaycorp/pino-cloud';
 import env from 'env-var';
-import pino, { type Level, type Logger } from 'pino';
+import { type Level, type Logger, pino } from 'pino';
 
 const APP_NAME = 'letro-server';
 
