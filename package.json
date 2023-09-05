@@ -28,6 +28,7 @@
     "@relaycorp/veraid-authority": "^1.9.0",
     "@typegoose/typegoose": "^11.3.0",
     "cloudevents": "^7.0.1",
+    "confusables": "^1.1.1",
     "date-fns": "^2.30.0",
     "env-var": "^7.3.0",
     "fastify": "^4.19.2",
@@ -35,7 +36,8 @@
     "google-auth-library": "^9.0.0",
     "moize": "^6.1.6",
     "mongoose": "^7.3.4",
-    "pino": "^8.11.0"
+    "pino": "^8.11.0",
+    "unique-username-generator": "^1.2.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",
