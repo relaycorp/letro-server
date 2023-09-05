@@ -6,6 +6,7 @@ import {
   MemberPublicKeyImportCommand,
   type MemberPublicKeyImportOutput,
   MemberRole,
+  RawRetrievalCommand,
 } from '@relaycorp/veraid-authority';
 
 import {
@@ -14,6 +15,7 @@ import {
 } from '../../testUtils/veraidAuth/MockAuthorityClient.js';
 import { getPromiseRejection } from '../../testUtils/jest.js';
 import { LETRO_OID } from '../../utilities/letro.js';
+import { bufferToArrayBuffer } from '../../utilities/buffer.js';
 
 import { MANAGED_DOMAIN_NAMES, ORG_ENDPOINT_BY_DOMAIN } from './orgs.js';
 import { UserCreationCommand } from './UserCreationCommand.js';
@@ -34,7 +36,13 @@ const MEMBER_CREATION_OUTCOME: ExpectedOutcome<MemberCreationOutput> = {
 
 const MEMBER_PUBLIC_KEY_IMPORT_OUTCOME: ExpectedOutcome<MemberPublicKeyImportOutput> = {
   commandType: MemberPublicKeyImportCommand,
-  output: { self: '/self' },
+  output: { self: '/self', bundle: '/bundle' },
+};
+
+const MEMBER_BUNDLE = Buffer.from('the bundle');
+const MEMBER_BUNDLE_OUTCOME: ExpectedOutcome<ArrayBuffer> = {
+  commandType: RawRetrievalCommand,
+  output: bufferToArrayBuffer(MEMBER_BUNDLE),
 };
 
 const HTTP_CODE_CONFLICT = 409;
@@ -46,6 +54,7 @@ describe('UserCreationCommand', () => {
       const client = new MockAuthorityClient([
         MEMBER_CREATION_OUTCOME,
         MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+        MEMBER_BUNDLE_OUTCOME,
       ]);
 
       await command.run(client);
@@ -59,6 +68,7 @@ describe('UserCreationCommand', () => {
       const client = new MockAuthorityClient([
         MEMBER_CREATION_OUTCOME,
         MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+        MEMBER_BUNDLE_OUTCOME,
       ]);
 
       await command.run(client);
@@ -72,6 +82,7 @@ describe('UserCreationCommand', () => {
       const client = new MockAuthorityClient([
         MEMBER_CREATION_OUTCOME,
         MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+        MEMBER_BUNDLE_OUTCOME,
       ]);
 
       await command.run(client);
@@ -85,6 +96,7 @@ describe('UserCreationCommand', () => {
       const client = new MockAuthorityClient([
         MEMBER_CREATION_OUTCOME,
         MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+        MEMBER_BUNDLE_OUTCOME,
       ]);
 
       await command.run(client);
@@ -93,17 +105,17 @@ describe('UserCreationCommand', () => {
       expect(creationInput.email).toBeUndefined();
     });
 
-    test('User id and endpoint should be returned if creation is successful', async () => {
+    test('User name should be returned if creation is successful', async () => {
       const command = new UserCreationCommand(USER_NAME, ORG, PUBLIC_KEY_DER);
       const client = new MockAuthorityClient([
         MEMBER_CREATION_OUTCOME,
         MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+        MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      const { userName, endpoint } = await command.run(client);
+      const { userName } = await command.run(client);
 
       expect(userName).toBe(USER_NAME);
-      expect(endpoint).toBe(MEMBER_CREATION_OUTPUT.self);
     });
 
     test('Unexpected errors should be wrapped and rethrown', async () => {
@@ -130,6 +142,7 @@ describe('UserCreationCommand', () => {
         { commandType: MemberCreationCommand, output: duplicatedUserError },
         MEMBER_CREATION_OUTCOME,
         MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+        MEMBER_BUNDLE_OUTCOME,
       ]);
 
       const { userName } = await command.run(client);
@@ -146,6 +159,7 @@ describe('UserCreationCommand', () => {
         { commandType: MemberCreationCommand, output: duplicatedUserError },
         MEMBER_CREATION_OUTCOME,
         MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+        MEMBER_BUNDLE_OUTCOME,
       ]);
 
       const { userName } = await command.run(client);
@@ -175,6 +189,7 @@ describe('UserCreationCommand', () => {
       const client = new MockAuthorityClient([
         MEMBER_CREATION_OUTCOME,
         MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+        MEMBER_BUNDLE_OUTCOME,
       ]);
 
       await command.run(client);
@@ -188,6 +203,7 @@ describe('UserCreationCommand', () => {
       const client = new MockAuthorityClient([
         MEMBER_CREATION_OUTCOME,
         MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+        MEMBER_BUNDLE_OUTCOME,
       ]);
 
       await command.run(client);
@@ -201,6 +217,7 @@ describe('UserCreationCommand', () => {
       const client = new MockAuthorityClient([
         MEMBER_CREATION_OUTCOME,
         MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+        MEMBER_BUNDLE_OUTCOME,
       ]);
 
       await command.run(client);
@@ -216,6 +233,7 @@ describe('UserCreationCommand', () => {
         MEMBER_CREATION_OUTCOME,
         { commandType: MemberPublicKeyImportCommand, output: error },
         userDeletionOutcome,
+        MEMBER_BUNDLE_OUTCOME,
       ]);
 
       const wrappedError = await getPromiseRejection(async () => command.run(client), Error);
@@ -230,12 +248,28 @@ describe('UserCreationCommand', () => {
         MEMBER_CREATION_OUTCOME,
         { commandType: MemberPublicKeyImportCommand, output: new Error('Something went wrong') },
         userDeletionOutcome,
+        MEMBER_BUNDLE_OUTCOME,
       ]);
 
       await expect(command.run(client)).toReject();
 
       const deletionInput = client.getSentCommandInput(2, DeletionCommand);
       expect(deletionInput).toBe(MEMBER_CREATION_OUTPUT.self);
+    });
+  });
+
+  describe('Bundle', () => {
+    test('Bundle should be returned', async () => {
+      const command = new UserCreationCommand(USER_NAME, ORG, PUBLIC_KEY_DER);
+      const client = new MockAuthorityClient([
+        MEMBER_CREATION_OUTCOME,
+        MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+        MEMBER_BUNDLE_OUTCOME,
+      ]);
+
+      const { bundle } = await command.run(client);
+
+      expect(Buffer.from(bundle)).toMatchObject(MEMBER_BUNDLE);
     });
   });
 });

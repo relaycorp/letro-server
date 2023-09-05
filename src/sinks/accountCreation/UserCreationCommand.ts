@@ -8,6 +8,7 @@ import {
   type MemberCreationOutput,
   MemberPublicKeyImportCommand,
   MemberRole,
+  RawRetrievalCommand,
 } from '@relaycorp/veraid-authority';
 
 import { Command } from '../../utilities/veraidAuth/Command.js';
@@ -21,7 +22,7 @@ const MAX_USER_CREATION_ATTEMPTS = 3;
 
 interface UserCreationOutput {
   userName: string;
-  endpoint: string;
+  bundle: ArrayBuffer;
 }
 
 export class UserCreationCommand extends Command<UserCreationOutput> {
@@ -37,7 +38,7 @@ export class UserCreationCommand extends Command<UserCreationOutput> {
     this.orgEndpoint = ORG_ENDPOINT_BY_DOMAIN[org];
   }
 
-  private generateAltUserName(originalUserName: string) {
+  protected generateAltUserName(originalUserName: string): string {
     const suffixLength = Math.floor(Math.random() * ALT_USER_NAME_SUFFIX_LENGTH) + 1;
     const randomSuffix = randomBytes(suffixLength).toString('hex');
     return `${originalUserName}-${randomSuffix}`;
@@ -46,14 +47,17 @@ export class UserCreationCommand extends Command<UserCreationOutput> {
   public async run(client: AuthorityClient): Promise<UserCreationOutput> {
     const { userName, output } = await this.createUser(this.userName, client);
 
+    let bundleEndpoint;
     try {
-      await this.importKey(output.publicKeys, client);
+      ({ bundle: bundleEndpoint } = await this.importKey(output.publicKeys, client));
     } catch (err) {
       await this.deleteUser(output.self, client);
       throw new Error('Failed to import public key', { cause: err });
     }
 
-    return { userName, endpoint: output.self };
+    const bundle = await this.retrieveBundle(bundleEndpoint, client);
+
+    return { userName, bundle };
   }
 
   protected async createUser(
@@ -91,11 +95,16 @@ export class UserCreationCommand extends Command<UserCreationOutput> {
       publicKeyDer: this.publicKeyDer,
       serviceOid: LETRO_OID,
     });
-    await client.send(keyImportCommand);
+    return client.send(keyImportCommand);
   }
 
   private async deleteUser(userEndpoint: string, client: AuthorityClient) {
     const deletionCommand = new DeletionCommand(userEndpoint);
     await client.send(deletionCommand);
+  }
+
+  private async retrieveBundle(bundleEndpoint: string, client: AuthorityClient) {
+    const command = new RawRetrievalCommand(bundleEndpoint);
+    return client.send(command);
   }
 }
