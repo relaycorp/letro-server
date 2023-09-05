@@ -1,7 +1,6 @@
 import { sanitiseUserName, RESERVED_WORDS } from './userNameValidation.js';
 
-// eslint-disable-next-line security/detect-unsafe-regex,prefer-named-capture-group,regexp/prefer-named-capture-group
-const GENERATED_NAME_REGEX = /^\w+(-\w+)+$/u;
+const GENERATED_NAME_REGEX = /^[\w-]{1,16}$/u;
 
 describe('sanitiseUserName', () => {
   test('Name should have at least one character', () => {
