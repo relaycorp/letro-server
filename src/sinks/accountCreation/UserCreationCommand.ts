@@ -47,15 +47,15 @@ export class UserCreationCommand extends Command<UserCreationOutput> {
   public async run(client: AuthorityClient): Promise<UserCreationOutput> {
     const { userName, output } = await this.createUser(this.userName, client);
 
-    let bundleEndpoint;
+    let bundle;
     try {
-      ({ bundle: bundleEndpoint } = await this.importKey(output.publicKeys, client));
+      const { bundle: bundleEndpoint } = await this.importKey(output.publicKeys, client);
+      bundle = await this.retrieveBundle(bundleEndpoint, client);
     } catch (err) {
+      // Clean up so we can try again later
       await this.deleteUser(output.self, client);
-      throw new Error('Failed to import public key', { cause: err });
+      throw new Error('Failed to complete user creation', { cause: err });
     }
-
-    const bundle = await this.retrieveBundle(bundleEndpoint, client);
 
     return { userName, bundle };
   }

@@ -45,6 +45,8 @@ const MEMBER_BUNDLE_OUTCOME: ExpectedOutcome<ArrayBuffer> = {
   output: bufferToArrayBuffer(MEMBER_BUNDLE),
 };
 
+const MEMBER_DELETION_OUTCOME = { commandType: DeletionCommand, output: {} };
+
 const HTTP_CODE_CONFLICT = 409;
 
 describe('UserCreationCommand', () => {
@@ -182,8 +184,6 @@ describe('UserCreationCommand', () => {
   });
 
   describe('Public key import', () => {
-    const userDeletionOutcome = { commandType: DeletionCommand, output: {} };
-
     test('Key should be posted to the public keys endpoint', async () => {
       const command = new UserCreationCommand(USER_NAME, ORG, PUBLIC_KEY_DER);
       const client = new MockAuthorityClient([
@@ -232,13 +232,13 @@ describe('UserCreationCommand', () => {
       const client = new MockAuthorityClient([
         MEMBER_CREATION_OUTCOME,
         { commandType: MemberPublicKeyImportCommand, output: error },
-        userDeletionOutcome,
+        MEMBER_DELETION_OUTCOME,
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
       const wrappedError = await getPromiseRejection(async () => command.run(client), Error);
 
-      expect(wrappedError.message).toBe('Failed to import public key');
+      expect(wrappedError.message).toBe('Failed to complete user creation');
       expect(wrappedError.cause).toBe(error);
     });
 
@@ -247,7 +247,7 @@ describe('UserCreationCommand', () => {
       const client = new MockAuthorityClient([
         MEMBER_CREATION_OUTCOME,
         { commandType: MemberPublicKeyImportCommand, output: new Error('Something went wrong') },
-        userDeletionOutcome,
+        MEMBER_DELETION_OUTCOME,
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
@@ -270,6 +270,37 @@ describe('UserCreationCommand', () => {
       const { bundle } = await command.run(client);
 
       expect(Buffer.from(bundle)).toMatchObject(MEMBER_BUNDLE);
+    });
+
+    test('Unexpected errors should be wrapped and rethrown', async () => {
+      const error = new Error('Something went wrong');
+      const command = new UserCreationCommand(USER_NAME, ORG, PUBLIC_KEY_DER);
+      const client = new MockAuthorityClient([
+        MEMBER_CREATION_OUTCOME,
+        MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+        { commandType: RawRetrievalCommand, output: error },
+        MEMBER_DELETION_OUTCOME,
+      ]);
+
+      const wrappedError = await getPromiseRejection(async () => command.run(client), Error);
+
+      expect(wrappedError.message).toBe('Failed to complete user creation');
+      expect(wrappedError.cause).toBe(error);
+    });
+
+    test('User should be deleted if bundle could not be retrieved', async () => {
+      const command = new UserCreationCommand(USER_NAME, ORG, PUBLIC_KEY_DER);
+      const client = new MockAuthorityClient([
+        MEMBER_CREATION_OUTCOME,
+        MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+        { commandType: RawRetrievalCommand, output: new Error('Something went wrong') },
+        MEMBER_DELETION_OUTCOME,
+      ]);
+
+      await expect(command.run(client)).toReject();
+
+      const deletionInput = client.getSentCommandInput(3, DeletionCommand);
+      expect(deletionInput).toBe(MEMBER_CREATION_OUTPUT.self);
     });
   });
 });
