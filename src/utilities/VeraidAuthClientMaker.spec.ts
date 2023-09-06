@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 import envVar from 'env-var';
 
 import { configureMockEnvVars } from '../testUtils/envVars.js';
-import { VAUTH_TOKEN, VAUTH_API_URL } from '../testUtils/veraidAuth/stubs.js';
+import { VAUTH_TOKEN, VAUTH_API_URL } from '../testUtils/veraid/authority/stubs.js';
 
 const mockGetGoogleIdToken = jest.fn<() => Promise<string>>().mockResolvedValue(VAUTH_TOKEN);
 jest.unstable_mockModule('./googleAuthn.js', () => ({

@@ -12,7 +12,7 @@ import {
 import {
   type ExpectedOutcome,
   MockAuthorityClient,
-} from '../../testUtils/veraidAuth/MockAuthorityClient.js';
+} from '../../testUtils/veraid/authority/MockAuthorityClient.js';
 import { getPromiseRejection } from '../../testUtils/jest.js';
 import { LETRO_OID } from '../../utilities/letro.js';
 import { bufferToArrayBuffer } from '../../utilities/buffer.js';
