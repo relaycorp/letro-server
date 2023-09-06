@@ -16,7 +16,7 @@ import { LETRO_OID } from '../../utilities/letro.js';
 import { type ManagedDomainName, ORG_ENDPOINT_BY_DOMAIN } from './orgs.js';
 
 const USER_NAME_TAKEN_STATUS_CODE = 409;
-const ALT_USER_NAME_SUFFIX_LENGTH = 3;
+const USER_NAME_SUFFIX_LENGTH = 3;
 const MAX_USER_CREATION_ATTEMPTS = 3;
 
 interface UserCreationOutput {
@@ -24,10 +24,10 @@ interface UserCreationOutput {
   bundle: ArrayBuffer;
 }
 
-function generateAltUserName(originalUserName: string): string {
-  const suffixLength = Math.floor(Math.random() * ALT_USER_NAME_SUFFIX_LENGTH) + 1;
+function addNameSuffix(name: string): string {
+  const suffixLength = Math.floor(Math.random() * USER_NAME_SUFFIX_LENGTH) + 1;
   const randomSuffix = randomBytes(suffixLength).toString('hex');
-  return `${originalUserName}-${randomSuffix}`;
+  return `${name}-${randomSuffix}`;
 }
 
 async function createUserWithRetries(
@@ -36,7 +36,7 @@ async function createUserWithRetries(
   client: AuthorityClient,
   attempts = 1,
 ): Promise<{ userName: string; output: MemberCreationOutput }> {
-  const userName = attempts === 1 ? preferredUserName : generateAltUserName(preferredUserName);
+  const userName = attempts === 1 ? preferredUserName : addNameSuffix(preferredUserName);
   const orgEndpoint = ORG_ENDPOINT_BY_DOMAIN[org];
   const creationCommand = new MemberCreationCommand({
     name: userName,

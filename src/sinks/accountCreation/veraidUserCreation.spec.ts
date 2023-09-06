@@ -16,13 +16,10 @@ import {
 import { getPromiseRejection } from '../../testUtils/jest.js';
 import { LETRO_OID } from '../../utilities/letro.js';
 import { bufferToArrayBuffer } from '../../utilities/buffer.js';
+import { ORG_NAME, MEMBER_PUBLIC_KEY_DER, USER_NAME } from '../../testUtils/veraid/stubs.js';
 
-import { MANAGED_DOMAIN_NAMES, ORG_ENDPOINT_BY_DOMAIN } from './orgs.js';
+import { ORG_ENDPOINT_BY_DOMAIN } from './orgs.js';
 import { createUser } from './veraidUserCreation.js';
-
-const USER_NAME = 'alice';
-const [ORG] = MANAGED_DOMAIN_NAMES;
-const PUBLIC_KEY_DER = Buffer.from('public key');
 
 const MEMBER_CREATION_OUTPUT = {
   self: '/self',
@@ -58,7 +55,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client);
+      await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       const creationInput = client.getSentCommandInput(0, MemberCreationCommand);
       expect(creationInput.name).toBe(USER_NAME);
@@ -71,10 +68,10 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client);
+      await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       const creationInput = client.getSentCommandInput(0, MemberCreationCommand);
-      expect(creationInput.endpoint).toBe(ORG_ENDPOINT_BY_DOMAIN[ORG]);
+      expect(creationInput.endpoint).toBe(ORG_ENDPOINT_BY_DOMAIN[ORG_NAME]);
     });
 
     test('User role should be regular', async () => {
@@ -84,7 +81,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client);
+      await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       const creationInput = client.getSentCommandInput(0, MemberCreationCommand);
       expect(creationInput.role).toBe(MemberRole.REGULAR);
@@ -97,7 +94,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client);
+      await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       const creationInput = client.getSentCommandInput(0, MemberCreationCommand);
       expect(creationInput.email).toBeUndefined();
@@ -110,7 +107,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      const { userName } = await createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client);
+      const { userName } = await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       expect(userName).toBe(USER_NAME);
     });
@@ -122,7 +119,7 @@ describe('createUser', () => {
       ]);
 
       const wrappedError = await getPromiseRejection(
-        async () => createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client),
+        async () => createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client),
         Error,
       );
 
@@ -133,6 +130,7 @@ describe('createUser', () => {
 
   describe('Taken user names', () => {
     const duplicatedUserError = new ClientError('User name already taken', HTTP_CODE_CONFLICT);
+    // eslint-disable-next-line security/detect-non-literal-regexp
     const generatedUserNameRegex = new RegExp(`^${USER_NAME}-[a-f\\d]{1,6}$`, 'u');
 
     test('Creation should be retried with generated suffix if name is taken', async () => {
@@ -143,7 +141,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      const { userName } = await createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client);
+      const { userName } = await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       const creationInput = client.getSentCommandInput(1, MemberCreationCommand);
       expect(creationInput.name).toMatch(generatedUserNameRegex);
@@ -159,7 +157,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      const { userName } = await createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client);
+      const { userName } = await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       const creationInput = client.getSentCommandInput(2, MemberCreationCommand);
       expect(creationInput.name).toMatch(generatedUserNameRegex);
@@ -173,7 +171,7 @@ describe('createUser', () => {
         { commandType: MemberCreationCommand, output: duplicatedUserError },
       ]);
 
-      await expect(createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client)).rejects.toThrow(
+      await expect(createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client)).rejects.toThrow(
         'All user names considered were taken',
       );
     });
@@ -187,7 +185,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client);
+      await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       const importInput = client.getSentCommandInput(1, MemberPublicKeyImportCommand);
       expect(importInput.endpoint).toBe(MEMBER_CREATION_OUTPUT.publicKeys);
@@ -200,10 +198,10 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client);
+      await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       const importInput = client.getSentCommandInput(1, MemberPublicKeyImportCommand);
-      expect(importInput.publicKeyDer).toBe(PUBLIC_KEY_DER);
+      expect(importInput.publicKeyDer).toBe(MEMBER_PUBLIC_KEY_DER);
     });
 
     test('Service OID should be that of Letro', async () => {
@@ -213,7 +211,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client);
+      await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       const importInput = client.getSentCommandInput(1, MemberPublicKeyImportCommand);
       expect(importInput.serviceOid).toBe(LETRO_OID);
@@ -229,7 +227,7 @@ describe('createUser', () => {
       ]);
 
       const wrappedError = await getPromiseRejection(
-        async () => createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client),
+        async () => createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client),
         Error,
       );
 
@@ -245,7 +243,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await expect(createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client)).toReject();
+      await expect(createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client)).toReject();
 
       const deletionInput = client.getSentCommandInput(2, DeletionCommand);
       expect(deletionInput).toBe(MEMBER_CREATION_OUTPUT.self);
@@ -260,7 +258,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      const { bundle } = await createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client);
+      const { bundle } = await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       expect(Buffer.from(bundle)).toMatchObject(MEMBER_BUNDLE);
     });
@@ -275,7 +273,7 @@ describe('createUser', () => {
       ]);
 
       const wrappedError = await getPromiseRejection(
-        async () => createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client),
+        async () => createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client),
         Error,
       );
 
@@ -291,7 +289,7 @@ describe('createUser', () => {
         MEMBER_DELETION_OUTCOME,
       ]);
 
-      await expect(createUser(USER_NAME, ORG, PUBLIC_KEY_DER, client)).toReject();
+      await expect(createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client)).toReject();
 
       const deletionInput = client.getSentCommandInput(3, DeletionCommand);
       expect(deletionInput).toBe(MEMBER_CREATION_OUTPUT.self);
