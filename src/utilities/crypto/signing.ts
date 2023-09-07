@@ -1,14 +1,17 @@
 import { createPublicKey, verify } from 'node:crypto';
+import { promisify } from 'node:util';
 
-export function verifySignature(
+const verifyAsync = promisify(verify);
+
+export async function verifySignature(
   plaintext: ArrayBuffer,
   signature: ArrayBuffer,
   publicKeyDer: ArrayBuffer,
-): boolean {
+): Promise<boolean> {
   const publicKey = createPublicKey({
     key: Buffer.from(publicKeyDer),
     type: 'spki',
     format: 'der',
   });
-  return verify(null, Buffer.from(plaintext), publicKey, Buffer.from(signature));
+  return verifyAsync(null, Buffer.from(plaintext), publicKey, Buffer.from(signature));
 }

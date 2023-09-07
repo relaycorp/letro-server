@@ -13,27 +13,30 @@ const PLAINTEXT = bufferToArrayBuffer(Buffer.from('plaintext'));
 
 describe('verifySignature', () => {
   describe('RSA', () => {
-    test('Invalid signature should be refused', () => {
+    test('Invalid signature should be refused', async () => {
       const { publicKey } = generateRsaPssKeyPair();
 
-      expect(
+      await expect(
         verifySignature(PLAINTEXT, bufferToArrayBuffer(Buffer.from('invalid')), publicKey),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
 
-    test.each([2048, 3072, 4096])('RSA modulus %s should be accepted', (modulus) => {
+    test.each([2048, 3072, 4096])('RSA modulus %s should be accepted', async (modulus) => {
       const { publicKey, privateKey } = generateRsaPssKeyPair({ modulus });
       const signature = signPlaintext(PLAINTEXT, privateKey);
 
-      expect(verifySignature(PLAINTEXT, signature, publicKey)).toBeTrue();
+      await expect(verifySignature(PLAINTEXT, signature, publicKey)).resolves.toBeTrue();
     });
 
-    test.each(['SHA-256', 'SHA-384', 'SHA-512'])('Hash %s should be accepted', (hashAlgorithm) => {
-      const { publicKey, privateKey } = generateRsaPssKeyPair({ hashAlgorithm });
-      const signature = signPlaintext(PLAINTEXT, privateKey);
+    test.each(['SHA-256', 'SHA-384', 'SHA-512'])(
+      'Hash %s should be accepted',
+      async (hashAlgorithm) => {
+        const { publicKey, privateKey } = generateRsaPssKeyPair({ hashAlgorithm });
+        const signature = signPlaintext(PLAINTEXT, privateKey);
 
-      expect(verifySignature(PLAINTEXT, signature, publicKey)).toBeTrue();
-    });
+        await expect(verifySignature(PLAINTEXT, signature, publicKey)).resolves.toBeTrue();
+      },
+    );
   });
 
   describe('Ed25519', () => {
@@ -41,25 +44,27 @@ describe('verifySignature', () => {
       publicKeyEncoding: PUBLIC_KEY_DER_ENCODING,
     });
 
-    test('Valid signature should be allowed', () => {
+    test('Valid signature should be allowed', async () => {
       const signature = signPlaintext(PLAINTEXT, privateKey);
 
-      expect(verifySignature(PLAINTEXT, signature, publicKey as unknown as ArrayBuffer)).toBeTrue();
+      await expect(
+        verifySignature(PLAINTEXT, signature, publicKey as unknown as ArrayBuffer),
+      ).resolves.toBeTrue();
     });
 
-    test('Invalid signature should be refused', () => {
+    test('Invalid signature should be refused', async () => {
       const differentPlaintext = bufferToArrayBuffer(Buffer.from(PLAINTEXT.slice(1)));
       const signature = signPlaintext(differentPlaintext, privateKey);
 
-      expect(
+      await expect(
         verifySignature(PLAINTEXT, signature, publicKey as unknown as ArrayBuffer),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
   });
 
   test.each<KeyType>(['ed25519', 'ed448'])(
     'EdDSA algorithm %s should be supported',
-    (algorithm) => {
+    async (algorithm) => {
       const { publicKey, privateKey } = generateKeyPairSync(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         algorithm as any,
@@ -67,10 +72,12 @@ describe('verifySignature', () => {
       );
       const signature = signPlaintext(PLAINTEXT, privateKey);
 
-      expect(verifySignature(PLAINTEXT, signature, publicKey as unknown as ArrayBuffer)).toBeTrue();
-      expect(
+      await expect(
+        verifySignature(PLAINTEXT, signature, publicKey as unknown as ArrayBuffer),
+      ).resolves.toBeTrue();
+      await expect(
         verifySignature(PLAINTEXT, new ArrayBuffer(2), publicKey as unknown as ArrayBuffer),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     },
   );
 });
