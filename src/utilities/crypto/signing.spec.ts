@@ -1,47 +1,20 @@
-import {
-  generateKeyPairSync,
-  type KeyExportOptions,
-  type KeyObject,
-  type KeyType,
-  sign,
-} from 'node:crypto';
+import { generateKeyPairSync, type KeyType } from 'node:crypto';
 
 import { bufferToArrayBuffer } from '../buffer.js';
+import {
+  generateRsaPssKeyPair,
+  PUBLIC_KEY_DER_ENCODING,
+  signPlaintext,
+} from '../../testUtils/crypto/signing.js';
 
 import { verifySignature } from './signing.js';
 
-const PUBLIC_KEY_DER_ENCODING: KeyExportOptions<'der'> = { type: 'spki', format: 'der' };
-
 const PLAINTEXT = bufferToArrayBuffer(Buffer.from('plaintext'));
-
-interface KeyPair {
-  publicKey: ArrayBuffer;
-  privateKey: KeyObject;
-}
-
-function generateRsaKeyPair(modulus: number, hashAlgorithm: string): KeyPair {
-  const options = {
-    modulusLength: modulus,
-    hashAlgorithm,
-    mgf1HashAlgorithm: hashAlgorithm,
-    publicKeyEncoding: PUBLIC_KEY_DER_ENCODING,
-  };
-  const { publicKey, privateKey } = generateKeyPairSync('rsa-pss', options);
-  return { privateKey, publicKey: bufferToArrayBuffer(publicKey as unknown as Uint8Array) };
-}
-
-function signPlaintext(plaintext: ArrayBuffer, privateKey: KeyObject): ArrayBuffer {
-  const signature = sign(null, Buffer.from(plaintext), privateKey);
-  return bufferToArrayBuffer(signature);
-}
 
 describe('verifySignature', () => {
   describe('RSA', () => {
-    const defaultModulus = 2048;
-    const defaultHash = 'SHA-256';
-
     test('Invalid signature should be refused', () => {
-      const { publicKey } = generateRsaKeyPair(defaultModulus, defaultHash);
+      const { publicKey } = generateRsaPssKeyPair();
 
       expect(
         verifySignature(PLAINTEXT, bufferToArrayBuffer(Buffer.from('invalid')), publicKey),
@@ -49,14 +22,14 @@ describe('verifySignature', () => {
     });
 
     test.each([2048, 3072, 4096])('RSA modulus %s should be accepted', (modulus) => {
-      const { publicKey, privateKey } = generateRsaKeyPair(modulus, defaultHash);
+      const { publicKey, privateKey } = generateRsaPssKeyPair({ modulus });
       const signature = signPlaintext(PLAINTEXT, privateKey);
 
       expect(verifySignature(PLAINTEXT, signature, publicKey)).toBeTrue();
     });
 
-    test.each(['SHA-256', 'SHA-384', 'SHA-512'])('Hash %s should be accepted', (hash) => {
-      const { publicKey, privateKey } = generateRsaKeyPair(defaultModulus, hash);
+    test.each(['SHA-256', 'SHA-384', 'SHA-512'])('Hash %s should be accepted', (hashAlgorithm) => {
+      const { publicKey, privateKey } = generateRsaPssKeyPair({ hashAlgorithm });
       const signature = signPlaintext(PLAINTEXT, privateKey);
 
       expect(verifySignature(PLAINTEXT, signature, publicKey)).toBeTrue();
