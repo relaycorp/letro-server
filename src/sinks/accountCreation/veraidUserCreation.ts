@@ -111,5 +111,3 @@ export async function createVeraidUser(
 
   return { userName, bundle };
 }
-
-export type { UserCreationOutput };
