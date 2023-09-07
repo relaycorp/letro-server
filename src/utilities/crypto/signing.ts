@@ -10,6 +10,5 @@ export function verifySignature(
     type: 'spki',
     format: 'der',
   });
-
   return verify(null, Buffer.from(plaintext), publicKey, Buffer.from(signature));
 }
