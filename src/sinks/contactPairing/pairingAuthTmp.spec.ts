@@ -41,7 +41,7 @@ describe('pairingCompletionTmp', () => {
   } = makeSinkTestRunner(pairingAuthTmp);
 
   test('Malformed connection params should be refused', async () => {
-    await runner(Buffer.from('malformed'));
+    await expect(runner(Buffer.from('malformed'))).resolves.toBeTrue();
 
     expect(logs).toContainEqual(
       partialPinoLog('info', 'Refused malformed connection params', {
@@ -58,7 +58,7 @@ describe('pairingCompletionTmp', () => {
       sessionKeyPair.sessionKey,
     );
 
-    await runner(Buffer.from(await connectionParams.serialize()));
+    await expect(runner(Buffer.from(await connectionParams.serialize()))).resolves.toBeTrue();
 
     expect(logs).toContainEqual(
       partialPinoLog('info', 'Refused connection params not issued by sender', {
@@ -79,7 +79,9 @@ describe('pairingCompletionTmp', () => {
     const granterEndpointId = await getIdFromIdentityKey(granterIdentityKeyPair.publicKey);
     const connectionParamsSerialised = Buffer.from(await connectionParams.serialize());
 
-    await runner(connectionParamsSerialised, { senderEndpointId: granterEndpointId });
+    await expect(
+      runner(connectionParamsSerialised, { senderEndpointId: granterEndpointId }),
+    ).resolves.toBeTrue();
 
     const granteeEndpointId = await getIdFromIdentityKey(granteeIdentityKeyPair.publicKey);
     expect(emittedEvents).toContainEqual(

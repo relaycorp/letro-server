@@ -1,6 +1,6 @@
 import { PrivateEndpointConnParams } from '@relaycorp/relaynet-core';
 
-import type { MessageSink } from '../sinkTypes.js';
+import type { MessageSink } from '../types.js';
 import { bufferToArrayBuffer } from '../../utilities/buffer.js';
 import { makeOutgoingServiceMessage } from '../../utilities/awalaEndpoint.js';
 

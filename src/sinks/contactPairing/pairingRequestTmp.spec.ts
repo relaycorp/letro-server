@@ -51,7 +51,7 @@ describe('contactRequestTmp', () => {
   });
 
   test('Input message should have at least 3 comma-separated fields', async () => {
-    await runner(Buffer.from('one,two'));
+    await expect(runner(Buffer.from('one,two'))).resolves.toBeTrue();
 
     expect(logs).toContainEqual(
       partialPinoLog('info', 'Refused malformed request containing fewer than 3 fields'),
@@ -60,7 +60,9 @@ describe('contactRequestTmp', () => {
 
   describe('Non-matching request', () => {
     test('Request should be created if it does not exist', async () => {
-      await runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey));
+      await expect(
+        runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey)),
+      ).resolves.toBeTrue();
 
       await expect(
         requestModel.exists({ requesterVeraId, targetVeraId, requesterEndpointId, requesterIdKey }),
@@ -75,11 +77,15 @@ describe('contactRequestTmp', () => {
 
     test('Request should be updated if it exists', async () => {
       // Request #1
-      await runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey));
+      await expect(
+        runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey)),
+      ).resolves.toBeTrue();
 
       // Request #2
       const requesterIdKey2 = Buffer.concat([requesterIdKey, Buffer.from('2')]);
-      await runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey2));
+      await expect(
+        runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey2)),
+      ).resolves.toBeTrue();
 
       await expect(
         requestModel.exists({
@@ -109,10 +115,14 @@ describe('contactRequestTmp', () => {
   describe('Matching request', () => {
     test('Neither request should be left in the DB', async () => {
       // Request #1: Swap the requester and target
-      await runner(serialiseContactRequest(targetVeraId, requesterVeraId, targetIdKey));
+      await expect(
+        runner(serialiseContactRequest(targetVeraId, requesterVeraId, targetIdKey)),
+      ).resolves.toBeTrue();
 
       // Request #2
-      await runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey));
+      await expect(
+        runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey)),
+      ).resolves.toBeTrue();
 
       await expect(requestModel.exists({ requesterVeraId, targetVeraId })).resolves.toBeNull();
       await expect(
@@ -123,12 +133,16 @@ describe('contactRequestTmp', () => {
     test('Both peers should get their requests swapped', async () => {
       // Request #1: Swap the requester and target
       const originalRequesterEndpointId = 'originalRequesterEndpointId';
-      await runner(serialiseContactRequest(targetVeraId, requesterVeraId, targetIdKey), {
-        senderEndpointId: originalRequesterEndpointId,
-      });
+      await expect(
+        runner(serialiseContactRequest(targetVeraId, requesterVeraId, targetIdKey), {
+          senderEndpointId: originalRequesterEndpointId,
+        }),
+      ).resolves.toBeTrue();
 
       // Request #2
-      await runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey));
+      await expect(
+        runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey)),
+      ).resolves.toBeTrue();
 
       expect(emittedEvents).toHaveLength(2);
       const [event1, event2] = emittedEvents;
@@ -172,10 +186,14 @@ describe('contactRequestTmp', () => {
 
     test('Match should be logged', async () => {
       // Request #1: Swap the requester and target
-      await runner(serialiseContactRequest(targetVeraId, requesterVeraId, targetIdKey));
+      await expect(
+        runner(serialiseContactRequest(targetVeraId, requesterVeraId, targetIdKey)),
+      ).resolves.toBeTrue();
 
       // Request #2
-      await runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey));
+      await expect(
+        runner(serialiseContactRequest(requesterVeraId, targetVeraId, requesterIdKey)),
+      ).resolves.toBeTrue();
 
       expect(logs).toContainEqual(
         partialPinoLog('info', 'Contact request matched', {

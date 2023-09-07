@@ -1,6 +1,6 @@
 ---
 permalink: /contact-pairing
-nav_order: 2
+nav_order: 3
 ---
 
 # Contact pairing
@@ -20,7 +20,7 @@ The two parties will then be able to communicate with each other using the Awala
 
 ### Contact pairing request
 
-This message signifies  a Letro user's intention to pair with another user.
+This message signifies a Letro user's intention to pair with another user.
 
 - Recipient: Letro server.
 - Content type: `application/vnd.relaycorp.letro.pairing-request-tmp`.
@@ -131,3 +131,7 @@ fun importPairingAuth(auth: ByteArray) {
     }
 }
 ```
+
+## Data persistence
+
+Contact pairing requests are stored for up to 90 days or until they are matched, whichever comes first.
