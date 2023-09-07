@@ -3,7 +3,8 @@
   "compilerOptions": {
     "emitDecoratorMetadata": true,
     "outDir": "build",
-    "rootDir": "src"
+    "rootDir": "src",
+    "module": "esnext",
   },
   "include": ["src/**/*.ts", "src/**/*.cjs"]
 }

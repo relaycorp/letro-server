@@ -1,4 +1,4 @@
-import domainByLocale from './domainNames.json';
+import domainByLocale from './domainNames.json' assert { type: 'json' };
 
 type DomainByLocale = typeof domainByLocale;
 export type Locale = keyof DomainByLocale;
