@@ -10,6 +10,7 @@ import {
   MemberRole,
   RawRetrievalCommand,
 } from '@relaycorp/veraid-authority';
+import type { BaseLogger } from 'pino';
 
 import { LETRO_OID } from '../../utilities/letro.js';
 
@@ -34,6 +35,7 @@ async function createUserWithRetries(
   preferredUserName: string,
   org: ManagedDomainName,
   client: AuthorityClient,
+  logger: BaseLogger,
   attempts = 1,
 ): Promise<{ userName: string; output: MemberCreationOutput }> {
   const userName = attempts === 1 ? preferredUserName : addNameSuffix(preferredUserName);
@@ -51,12 +53,14 @@ async function createUserWithRetries(
       if (MAX_USER_CREATION_ATTEMPTS <= attempts) {
         throw new Error('All user names considered were taken');
       }
-      return createUserWithRetries(preferredUserName, org, client, attempts + 1);
+      logger.debug({ userName }, 'User name taken; will try adding a random suffix');
+      return createUserWithRetries(preferredUserName, org, client, logger, attempts + 1);
     }
 
     throw new Error('Failed to create user', { cause: err });
   }
 
+  logger.debug({ userName }, 'User created in VeraId Authority');
   return { userName, output };
 }
 
@@ -64,13 +68,16 @@ async function importKey(
   publicKeyDer: Buffer,
   publicKeysEndpoint: string,
   client: AuthorityClient,
-) {
+  logger: BaseLogger,
+): Promise<string> {
   const keyImportCommand = new MemberPublicKeyImportCommand({
     endpoint: publicKeysEndpoint,
     publicKeyDer,
     serviceOid: LETRO_OID,
   });
-  return client.send(keyImportCommand);
+  const { bundle: bundleEndpoint } = await client.send(keyImportCommand);
+  logger.debug('Public key imported in VeraId Authority');
+  return bundleEndpoint;
 }
 
 async function deleteUser(userEndpoint: string, client: AuthorityClient) {
@@ -88,12 +95,13 @@ export async function createVeraidUser(
   org: ManagedDomainName,
   publicKeyDer: Buffer,
   client: AuthorityClient,
+  logger: BaseLogger,
 ): Promise<UserCreationOutput> {
-  const { userName, output } = await createUserWithRetries(preferredUserName, org, client);
+  const { userName, output } = await createUserWithRetries(preferredUserName, org, client, logger);
 
   let bundle;
   try {
-    const { bundle: bundleEndpoint } = await importKey(publicKeyDer, output.publicKeys, client);
+    const bundleEndpoint = await importKey(publicKeyDer, output.publicKeys, client, logger);
     bundle = await retrieveBundle(bundleEndpoint, client);
   } catch (err) {
     // Clean up so we can try again later
@@ -103,3 +111,5 @@ export async function createVeraidUser(
 
   return { userName, bundle };
 }
+
+export type { UserCreationOutput };

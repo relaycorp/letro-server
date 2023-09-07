@@ -22,6 +22,7 @@ import {
   ORG_NAME,
   USER_NAME,
 } from '../../testUtils/veraid/stubs.js';
+import { makeMockLogging, partialPinoLog } from '../../testUtils/logging.js';
 
 import { ORG_ENDPOINT_BY_DOMAIN } from './orgs.js';
 import { createVeraidUser } from './veraidUserCreation.js';
@@ -51,6 +52,8 @@ const MEMBER_DELETION_OUTCOME = { commandType: DeletionCommand, output: {} };
 const HTTP_CODE_CONFLICT = 409;
 
 describe('createVeraidUser', () => {
+  const { logs, logger } = makeMockLogging();
+
   describe('User creation', () => {
     test('User should be created with the specified name', async () => {
       const client = new MockAuthorityClient([
@@ -59,7 +62,7 @@ describe('createVeraidUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger);
 
       const creationInput = client.getSentCommandInput(0, MemberCreationCommand);
       expect(creationInput.name).toBe(USER_NAME);
@@ -72,7 +75,7 @@ describe('createVeraidUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger);
 
       const creationInput = client.getSentCommandInput(0, MemberCreationCommand);
       expect(creationInput.endpoint).toBe(ORG_ENDPOINT_BY_DOMAIN[ORG_NAME]);
@@ -85,7 +88,7 @@ describe('createVeraidUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger);
 
       const creationInput = client.getSentCommandInput(0, MemberCreationCommand);
       expect(creationInput.role).toBe(MemberRole.REGULAR);
@@ -98,7 +101,7 @@ describe('createVeraidUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger);
 
       const creationInput = client.getSentCommandInput(0, MemberCreationCommand);
       expect(creationInput.email).toBeUndefined();
@@ -116,9 +119,30 @@ describe('createVeraidUser', () => {
         ORG_NAME,
         MEMBER_PUBLIC_KEY_DER,
         client,
+        logger,
       );
 
       expect(userName).toBe(USER_NAME);
+    });
+
+    test('User creation should be logged', async () => {
+      const client = new MockAuthorityClient([
+        MEMBER_CREATION_OUTCOME,
+        MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+        MEMBER_BUNDLE_OUTCOME,
+      ]);
+
+      const { userName } = await createVeraidUser(
+        USER_NAME,
+        ORG_NAME,
+        MEMBER_PUBLIC_KEY_DER,
+        client,
+        logger,
+      );
+
+      expect(logs).toContainEqual(
+        partialPinoLog('debug', 'User created in VeraId Authority', { userName }),
+      );
     });
 
     test('Unexpected errors should be wrapped and rethrown', async () => {
@@ -128,7 +152,7 @@ describe('createVeraidUser', () => {
       ]);
 
       const wrappedError = await getPromiseRejection(
-        async () => createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client),
+        async () => createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger),
         Error,
       );
 
@@ -155,11 +179,17 @@ describe('createVeraidUser', () => {
         ORG_NAME,
         MEMBER_PUBLIC_KEY_DER,
         client,
+        logger,
       );
 
       const creationInput = client.getSentCommandInput(1, MemberCreationCommand);
       expect(creationInput.name).toMatch(generatedUserNameRegex);
       expect(userName).toBe(creationInput.name);
+      expect(logs).toContainEqual(
+        partialPinoLog('debug', 'User name taken; will try adding a random suffix', {
+          userName: USER_NAME,
+        }),
+      );
     });
 
     test('Creation should be retried a second time if name is taken', async () => {
@@ -176,11 +206,17 @@ describe('createVeraidUser', () => {
         ORG_NAME,
         MEMBER_PUBLIC_KEY_DER,
         client,
+        logger,
       );
 
       const creationInput = client.getSentCommandInput(2, MemberCreationCommand);
       expect(creationInput.name).toMatch(generatedUserNameRegex);
       expect(userName).toBe(creationInput.name);
+      expect(logs).toContainEqual(
+        partialPinoLog('debug', 'User name taken; will try adding a random suffix', {
+          userName: expect.not.toBeOneOf([userName, USER_NAME]),
+        }),
+      );
     });
 
     test('Creation should fail if name is taken after two retries', async () => {
@@ -191,7 +227,7 @@ describe('createVeraidUser', () => {
       ]);
 
       await expect(
-        createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client),
+        createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger),
       ).rejects.toThrow('All user names considered were taken');
     });
   });
@@ -204,7 +240,7 @@ describe('createVeraidUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger);
 
       const importInput = client.getSentCommandInput(1, MemberPublicKeyImportCommand);
       expect(importInput.endpoint).toBe(MEMBER_CREATION_OUTPUT.publicKeys);
@@ -217,7 +253,7 @@ describe('createVeraidUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger);
 
       const importInput = client.getSentCommandInput(1, MemberPublicKeyImportCommand);
       expect(importInput.publicKeyDer).toBe(MEMBER_PUBLIC_KEY_DER);
@@ -230,10 +266,24 @@ describe('createVeraidUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger);
 
       const importInput = client.getSentCommandInput(1, MemberPublicKeyImportCommand);
       expect(importInput.serviceOid).toBe(LETRO_OID);
+    });
+
+    test('Key import should be logged', async () => {
+      const client = new MockAuthorityClient([
+        MEMBER_CREATION_OUTCOME,
+        MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+        MEMBER_BUNDLE_OUTCOME,
+      ]);
+
+      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger);
+
+      expect(logs).toContainEqual(
+        partialPinoLog('debug', 'Public key imported in VeraId Authority'),
+      );
     });
 
     test('Unexpected errors should be wrapped and rethrown', async () => {
@@ -246,7 +296,7 @@ describe('createVeraidUser', () => {
       ]);
 
       const wrappedError = await getPromiseRejection(
-        async () => createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client),
+        async () => createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger),
         Error,
       );
 
@@ -262,7 +312,9 @@ describe('createVeraidUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await expect(createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client)).toReject();
+      await expect(
+        createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger),
+      ).toReject();
 
       const deletionInput = client.getSentCommandInput(2, DeletionCommand);
       expect(deletionInput).toBe(MEMBER_CREATION_OUTPUT.self);
@@ -277,7 +329,13 @@ describe('createVeraidUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      const { bundle } = await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      const { bundle } = await createVeraidUser(
+        USER_NAME,
+        ORG_NAME,
+        MEMBER_PUBLIC_KEY_DER,
+        client,
+        logger,
+      );
 
       expect(Buffer.from(bundle)).toMatchObject(MEMBER_BUNDLE);
     });
@@ -292,7 +350,7 @@ describe('createVeraidUser', () => {
       ]);
 
       const wrappedError = await getPromiseRejection(
-        async () => createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client),
+        async () => createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger),
         Error,
       );
 
@@ -308,7 +366,9 @@ describe('createVeraidUser', () => {
         MEMBER_DELETION_OUTCOME,
       ]);
 
-      await expect(createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client)).toReject();
+      await expect(
+        createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger),
+      ).toReject();
 
       const deletionInput = client.getSentCommandInput(3, DeletionCommand);
       expect(deletionInput).toBe(MEMBER_CREATION_OUTPUT.self);
