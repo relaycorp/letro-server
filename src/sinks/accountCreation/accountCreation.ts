@@ -78,7 +78,7 @@ async function createUser(
 }
 
 const accountCreation: MessageSink = {
-  contentType: 'application/vnd.relaycorp.letro.account-creation-request',
+  contentType: 'application/vnd.relaycorp.letro.account-request',
 
   async handler(message, { logger, emitter, veraidAuthClientMaker }) {
     const request = await getAndValidateRequest(message.content, logger);
