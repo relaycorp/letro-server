@@ -14,6 +14,7 @@ import {
 } from '../utilities/awalaEndpoint.js';
 import pairingRequestTmp from '../sinks/contactPairing/pairingRequestTmp.js';
 import pairingAuthTmp from '../sinks/contactPairing/pairingAuthTmp.js';
+import { VeraidAuthClientMaker } from '../utilities/VeraidAuthClientMaker.js';
 
 const SINKS: MessageSink[] = [accountCreation, accountLinking, pairingRequestTmp, pairingAuthTmp];
 const HANDLER_BY_TYPE: { [contentType: string]: MessageSinkHandler } = SINKS.reduce(
@@ -32,6 +33,7 @@ export default function registerRoutes(
   });
 
   const emitter = Emitter.init();
+  const veraidAuthClientMaker = VeraidAuthClientMaker.init();
   fastify.route({
     method: ['POST'],
     url: '/',
@@ -69,6 +71,7 @@ export default function registerRoutes(
         emitter,
         logger: parcelAwareLogger,
         dbConnection: fastify.mongoose,
+        veraidAuthClientMaker,
       };
       const wasFulfilled = await handler(message, context);
       const responseCode = wasFulfilled

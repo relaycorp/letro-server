@@ -12,13 +12,17 @@ import {
 } from '@relaycorp/veraid-authority';
 import type { BaseLogger } from 'pino';
 
-import { LETRO_OID } from '../../utilities/letro.js';
+import { LETRO_OID } from '../../../utilities/letro.js';
 
-import { type ManagedDomainName, ORG_ENDPOINT_BY_DOMAIN } from './orgs.js';
+import { MANAGED_DOMAIN_NAMES } from './orgs.js';
 
 const USER_NAME_TAKEN_STATUS_CODE = 409;
 const USER_NAME_SUFFIX_LENGTH = 3;
 const MAX_USER_CREATION_ATTEMPTS = 3;
+
+const ORG_ENDPOINT_BY_DOMAIN: { [key in string]: string } = Object.fromEntries(
+  MANAGED_DOMAIN_NAMES.map((domain) => [domain, `/orgs/${domain}`]),
+) as { [key in string]: string };
 
 interface UserCreationOutput {
   userName: string;
@@ -33,7 +37,7 @@ function addNameSuffix(name: string): string {
 
 async function createUserWithRetries(
   preferredUserName: string,
-  org: ManagedDomainName,
+  org: string,
   client: AuthorityClient,
   logger: BaseLogger,
   attempts = 1,
@@ -65,14 +69,14 @@ async function createUserWithRetries(
 }
 
 async function importKey(
-  publicKeyDer: Buffer,
+  publicKeyDer: ArrayBuffer,
   publicKeysEndpoint: string,
   client: AuthorityClient,
   logger: BaseLogger,
 ): Promise<string> {
   const keyImportCommand = new MemberPublicKeyImportCommand({
     endpoint: publicKeysEndpoint,
-    publicKeyDer,
+    publicKeyDer: Buffer.from(publicKeyDer),
     serviceOid: LETRO_OID,
   });
   const { bundle: bundleEndpoint } = await client.send(keyImportCommand);
@@ -92,8 +96,8 @@ async function retrieveBundle(bundleEndpoint: string, client: AuthorityClient) {
 
 export async function createVeraidUser(
   preferredUserName: string,
-  org: ManagedDomainName,
-  publicKeyDer: Buffer,
+  org: string,
+  publicKeyDer: ArrayBuffer,
   client: AuthorityClient,
   logger: BaseLogger,
 ): Promise<UserCreationOutput> {
@@ -111,3 +115,5 @@ export async function createVeraidUser(
 
   return { userName, bundle };
 }
+
+export type { UserCreationOutput };

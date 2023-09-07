@@ -12,20 +12,19 @@ import {
 import {
   type ExpectedOutcome,
   MockAuthorityClient,
-} from '../../testUtils/veraid/authority/MockAuthorityClient.js';
-import { getPromiseRejection } from '../../testUtils/jest.js';
-import { LETRO_OID } from '../../utilities/letro.js';
-import { bufferToArrayBuffer } from '../../utilities/buffer.js';
+} from '../../../testUtils/veraid/authority/MockAuthorityClient.js';
+import { getPromiseRejection } from '../../../testUtils/jest.js';
+import { LETRO_OID } from '../../../utilities/letro.js';
+import { bufferToArrayBuffer } from '../../../utilities/buffer.js';
 import {
   MEMBER_BUNDLE,
   MEMBER_PUBLIC_KEY_DER,
   ORG_NAME,
   USER_NAME,
-} from '../../testUtils/veraid/stubs.js';
-import { makeMockLogging, partialPinoLog } from '../../testUtils/logging.js';
+} from '../../../testUtils/veraid/stubs.js';
+import { makeMockLogging, partialPinoLog } from '../../../testUtils/logging.js';
 
-import { ORG_ENDPOINT_BY_DOMAIN } from './orgs.js';
-import { createVeraidUser } from './veraidUserCreation.js';
+import { createVeraidUser } from './userCreation.js';
 
 const MEMBER_CREATION_OUTPUT = {
   self: '/self',
@@ -78,7 +77,7 @@ describe('createVeraidUser', () => {
       await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger);
 
       const creationInput = client.getSentCommandInput(0, MemberCreationCommand);
-      expect(creationInput.endpoint).toBe(ORG_ENDPOINT_BY_DOMAIN[ORG_NAME]);
+      expect(creationInput.endpoint).toBe(`/orgs/${ORG_NAME}`);
     });
 
     test('User role should be regular', async () => {
@@ -256,7 +255,7 @@ describe('createVeraidUser', () => {
       await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger);
 
       const importInput = client.getSentCommandInput(1, MemberPublicKeyImportCommand);
-      expect(importInput.publicKeyDer).toBe(MEMBER_PUBLIC_KEY_DER);
+      expect(importInput.publicKeyDer).toMatchObject(Buffer.from(MEMBER_PUBLIC_KEY_DER));
     });
 
     test('Service OID should be that of Letro', async () => {

@@ -5,7 +5,7 @@ import { SubjectPublicKeyInfo } from '@peculiar/asn1-x509';
 
 export class AccountRequest {
   @AsnProp({ type: AsnPropTypes.VisibleString, context: 0, implicit: true })
-  public name!: string;
+  public userName!: string;
 
   @AsnProp({ type: AsnPropTypes.VisibleString, context: 1, implicit: true })
   public locale!: string;

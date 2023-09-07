@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 import envVar from 'env-var';
 
 import { MONGODB_URI } from './db.js';
+import { VAUTH_API_URL } from './veraid/authority/stubs.js';
 
 interface EnvVarSet {
   readonly [key: string]: string | undefined;
@@ -10,6 +11,7 @@ interface EnvVarSet {
 export const REQUIRED_ENV_VARS = {
   VERSION: '1.0.0',
   MONGODB_URI,
+  VAUTH_API_URL,
 };
 
 export type EnvVarMocker = (envVars: EnvVarSet) => void;
