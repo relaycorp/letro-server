@@ -83,7 +83,7 @@ async function retrieveBundle(bundleEndpoint: string, client: AuthorityClient) {
   return client.send(command);
 }
 
-export async function createUser(
+export async function createVeraidUser(
   preferredUserName: string,
   org: ManagedDomainName,
   publicKeyDer: Buffer,

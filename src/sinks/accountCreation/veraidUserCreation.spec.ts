@@ -16,10 +16,15 @@ import {
 import { getPromiseRejection } from '../../testUtils/jest.js';
 import { LETRO_OID } from '../../utilities/letro.js';
 import { bufferToArrayBuffer } from '../../utilities/buffer.js';
-import { ORG_NAME, MEMBER_PUBLIC_KEY_DER, USER_NAME } from '../../testUtils/veraid/stubs.js';
+import {
+  MEMBER_BUNDLE,
+  MEMBER_PUBLIC_KEY_DER,
+  ORG_NAME,
+  USER_NAME,
+} from '../../testUtils/veraid/stubs.js';
 
 import { ORG_ENDPOINT_BY_DOMAIN } from './orgs.js';
-import { createUser } from './veraidUserCreation.js';
+import { createVeraidUser } from './veraidUserCreation.js';
 
 const MEMBER_CREATION_OUTPUT = {
   self: '/self',
@@ -36,7 +41,6 @@ const MEMBER_PUBLIC_KEY_IMPORT_OUTCOME: ExpectedOutcome<MemberPublicKeyImportOut
   output: { self: '/self', bundle: '/bundle' },
 };
 
-const MEMBER_BUNDLE = Buffer.from('the bundle');
 const MEMBER_BUNDLE_OUTCOME: ExpectedOutcome<ArrayBuffer> = {
   commandType: RawRetrievalCommand,
   output: bufferToArrayBuffer(MEMBER_BUNDLE),
@@ -46,7 +50,7 @@ const MEMBER_DELETION_OUTCOME = { commandType: DeletionCommand, output: {} };
 
 const HTTP_CODE_CONFLICT = 409;
 
-describe('createUser', () => {
+describe('createVeraidUser', () => {
   describe('User creation', () => {
     test('User should be created with the specified name', async () => {
       const client = new MockAuthorityClient([
@@ -55,7 +59,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       const creationInput = client.getSentCommandInput(0, MemberCreationCommand);
       expect(creationInput.name).toBe(USER_NAME);
@@ -68,7 +72,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       const creationInput = client.getSentCommandInput(0, MemberCreationCommand);
       expect(creationInput.endpoint).toBe(ORG_ENDPOINT_BY_DOMAIN[ORG_NAME]);
@@ -81,7 +85,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       const creationInput = client.getSentCommandInput(0, MemberCreationCommand);
       expect(creationInput.role).toBe(MemberRole.REGULAR);
@@ -94,7 +98,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       const creationInput = client.getSentCommandInput(0, MemberCreationCommand);
       expect(creationInput.email).toBeUndefined();
@@ -107,7 +111,12 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      const { userName } = await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      const { userName } = await createVeraidUser(
+        USER_NAME,
+        ORG_NAME,
+        MEMBER_PUBLIC_KEY_DER,
+        client,
+      );
 
       expect(userName).toBe(USER_NAME);
     });
@@ -119,7 +128,7 @@ describe('createUser', () => {
       ]);
 
       const wrappedError = await getPromiseRejection(
-        async () => createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client),
+        async () => createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client),
         Error,
       );
 
@@ -141,7 +150,12 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      const { userName } = await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      const { userName } = await createVeraidUser(
+        USER_NAME,
+        ORG_NAME,
+        MEMBER_PUBLIC_KEY_DER,
+        client,
+      );
 
       const creationInput = client.getSentCommandInput(1, MemberCreationCommand);
       expect(creationInput.name).toMatch(generatedUserNameRegex);
@@ -157,7 +171,12 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      const { userName } = await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      const { userName } = await createVeraidUser(
+        USER_NAME,
+        ORG_NAME,
+        MEMBER_PUBLIC_KEY_DER,
+        client,
+      );
 
       const creationInput = client.getSentCommandInput(2, MemberCreationCommand);
       expect(creationInput.name).toMatch(generatedUserNameRegex);
@@ -171,9 +190,9 @@ describe('createUser', () => {
         { commandType: MemberCreationCommand, output: duplicatedUserError },
       ]);
 
-      await expect(createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client)).rejects.toThrow(
-        'All user names considered were taken',
-      );
+      await expect(
+        createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client),
+      ).rejects.toThrow('All user names considered were taken');
     });
   });
 
@@ -185,7 +204,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       const importInput = client.getSentCommandInput(1, MemberPublicKeyImportCommand);
       expect(importInput.endpoint).toBe(MEMBER_CREATION_OUTPUT.publicKeys);
@@ -198,7 +217,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       const importInput = client.getSentCommandInput(1, MemberPublicKeyImportCommand);
       expect(importInput.publicKeyDer).toBe(MEMBER_PUBLIC_KEY_DER);
@@ -211,7 +230,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       const importInput = client.getSentCommandInput(1, MemberPublicKeyImportCommand);
       expect(importInput.serviceOid).toBe(LETRO_OID);
@@ -227,7 +246,7 @@ describe('createUser', () => {
       ]);
 
       const wrappedError = await getPromiseRejection(
-        async () => createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client),
+        async () => createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client),
         Error,
       );
 
@@ -243,7 +262,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      await expect(createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client)).toReject();
+      await expect(createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client)).toReject();
 
       const deletionInput = client.getSentCommandInput(2, DeletionCommand);
       expect(deletionInput).toBe(MEMBER_CREATION_OUTPUT.self);
@@ -258,7 +277,7 @@ describe('createUser', () => {
         MEMBER_BUNDLE_OUTCOME,
       ]);
 
-      const { bundle } = await createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
+      const { bundle } = await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client);
 
       expect(Buffer.from(bundle)).toMatchObject(MEMBER_BUNDLE);
     });
@@ -273,7 +292,7 @@ describe('createUser', () => {
       ]);
 
       const wrappedError = await getPromiseRejection(
-        async () => createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client),
+        async () => createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client),
         Error,
       );
 
@@ -289,7 +308,7 @@ describe('createUser', () => {
         MEMBER_DELETION_OUTCOME,
       ]);
 
-      await expect(createUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client)).toReject();
+      await expect(createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client)).toReject();
 
       const deletionInput = client.getSentCommandInput(3, DeletionCommand);
       expect(deletionInput).toBe(MEMBER_CREATION_OUTPUT.self);
