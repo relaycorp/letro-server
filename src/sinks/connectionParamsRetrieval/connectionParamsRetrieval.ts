@@ -42,14 +42,14 @@ function parseDomainName(domainNameBuffer: Buffer, logger: BaseLogger): string |
 }
 
 async function replyWithMisconfiguredEndpoint(
-  message: IncomingServiceMessage,
+  incomingMessage: IncomingServiceMessage,
   emitter: Emitter<unknown>,
 ) {
   const outgoingMessage = makeOutgoingServiceMessage({
-    senderId: message.recipientId,
-    recipientId: message.senderId,
+    senderId: incomingMessage.recipientId,
+    recipientId: incomingMessage.senderId,
     contentType: RELAYCORP_LETRO_TYPES.MISCONFIGURED_ENDPOINT,
-    content: message.content,
+    content: incomingMessage.content,
   });
   await emitter.emit(outgoingMessage);
 }
