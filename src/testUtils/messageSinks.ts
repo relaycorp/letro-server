@@ -7,6 +7,7 @@ import { type MockLogSet, makeMockLogging } from './logging.js';
 import { mockEmitter } from './eventing/mockEmitter.js';
 import { setUpTestDbConnection } from './db.js';
 import { mockClientMaker } from './veraid/authority/clientMaker.js';
+import { configureMockEnvVars, REQUIRED_ENV_VARS } from './envVars.js';
 
 interface TestRunnerOptions {
   readonly senderEndpointId: string;
@@ -31,6 +32,8 @@ export function makeSinkTestRunner(sink: MessageSink): TestRunnerContext {
 
   const senderEndpointId = 'sender-endpoint-id';
   const recipientEndpointId = 'recipient-endpoint-id';
+
+  configureMockEnvVars(REQUIRED_ENV_VARS);
 
   return {
     logs: mockLogger.logs,

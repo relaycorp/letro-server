@@ -20,7 +20,7 @@ This message signifies a Letro user's intention to retrieve the connection param
 
 - Recipient: Letro server.
 - Content type: `application/vnd.relaycorp.letro.connection-params-request`.
-- Content: The domain name encoded as a UTF-8 string.
+- Content: The domain name encoded as a UTF-8 string. Non-ASCII domain names (e.g., `はじめよう.みんな`) are supported.
 
 ### Connection params
 

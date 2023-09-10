@@ -1,11 +1,11 @@
-FROM node:20.3.1 as build
+FROM node:20.6.0 as build
 WORKDIR /tmp/letro-server
 COPY package*.json ./
 RUN npm install
 COPY . ./
 RUN npm run build && npm prune --omit=dev && rm -r src
 
-FROM node:20.3.1-slim
+FROM node:20.6.0-slim
 LABEL org.opencontainers.image.source="https://github.com/relaycorp/letro-server"
 USER node
 WORKDIR /opt/letro-server
