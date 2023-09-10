@@ -8,8 +8,9 @@ interface EnvVarSet {
   readonly [key: string]: string | undefined;
 }
 
+export const VERSION = '1.0.0';
 export const REQUIRED_ENV_VARS = {
-  VERSION: '1.0.0',
+  VERSION,
   MONGODB_URI,
   VAUTH_API_URL,
 };

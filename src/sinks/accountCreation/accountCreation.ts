@@ -6,7 +6,7 @@ import {
   type IncomingServiceMessage,
   makeOutgoingServiceMessage,
 } from '../../utilities/awalaEndpoint.js';
-import { RELAYCORP_LETRO_CONTENT_TYPES } from '../../utilities/letro.js';
+import { RELAYCORP_LETRO_TYPES } from '../../utilities/letro.js';
 import type { Emitter } from '../../utilities/eventing/Emitter.js';
 import type { VeraidAuthClientMaker } from '../../utilities/VeraidAuthClientMaker.js';
 
@@ -32,7 +32,7 @@ async function sendAccountCreationMessage(
   const accountCreatedEvent = makeOutgoingServiceMessage({
     senderId: message.recipientId,
     recipientId: message.senderId,
-    contentType: RELAYCORP_LETRO_CONTENT_TYPES.ACCOUNT_CREATION,
+    contentType: RELAYCORP_LETRO_TYPES.ACCOUNT_CREATION,
     content: Buffer.from(AsnSerializer.serialize(creationMessage)),
   });
   await emitter.emit(accountCreatedEvent);

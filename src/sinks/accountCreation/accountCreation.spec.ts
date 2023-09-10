@@ -14,7 +14,7 @@ import {
 import { bufferToArrayBuffer } from '../../utilities/buffer.js';
 import { LOCALE } from '../../testUtils/letro/stubs.js';
 import { signPlaintext } from '../../testUtils/crypto/signing.js';
-import { RELAYCORP_LETRO_CONTENT_TYPES } from '../../utilities/letro.js';
+import { RELAYCORP_LETRO_TYPES } from '../../utilities/letro.js';
 import { makeSinkTestRunner } from '../../testUtils/messageSinks.js';
 
 import type { UserCreationOutput } from './veraidAuth/userCreation.js';
@@ -201,7 +201,7 @@ describe('accountCreation handler', () => {
     test('Content type should be that of account creation', async () => {
       const event = await postRequestAndGetCreationMessage();
 
-      expect(event.datacontenttype).toBe(RELAYCORP_LETRO_CONTENT_TYPES.ACCOUNT_CREATION);
+      expect(event.datacontenttype).toBe(RELAYCORP_LETRO_TYPES.ACCOUNT_CREATION);
     });
 
     describe('Content', () => {
