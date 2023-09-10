@@ -7,8 +7,8 @@ nav_order: 2
 
 This module allows users to retrieve the connection parameters for an Awala Internet endpoint. It serves two purposes in Letro user agents by Relaycorp:
 
-- It allows the user to communicate with an Awala Internet endpoint (e.g., `bbc.com`, `mundo.bbc.com`).
-- It allows the user to communicate with a [VeraId Authority](https://docs.relaycorp.tech/veraid-authority/) server [via Awala](https://docs.relaycorp.tech/veraid-authority/awala). For example, to claim a VeraId identifier from a non-Relaycorp-managed domain name (e.g., `your-company.com`).
+- It allows the user to exchange messages with an Awala Internet endpoint (e.g., `bbc.com`, `mundo.bbc.com`).
+- It allows the user agent to communicate with a [VeraId Authority](https://docs.relaycorp.tech/veraid-authority/) server [via Awala](https://docs.relaycorp.tech/veraid-authority/awala). For example, to claim a VeraId identifier from a non-Relaycorp-managed domain name (e.g., `your-company.com`).
 
 Consequently, this functionality is agnostic of Letro and VeraId, but we're implementing here until [Awala itself supports it natively](https://github.com/AwalaNetwork/specs/issues/101).
 
