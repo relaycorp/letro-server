@@ -60,6 +60,7 @@ AccountCreation ::= SEQUENCE {
   locale            [1] VisibleString, -- E.g., "es-ve"
   assignedUserId    [2] VisibleString, -- E.g., "maria@guarapo.cafe"
   veraidBundle      [3] OCTET STRING
+}
 ```
 
 ## Data persistence
