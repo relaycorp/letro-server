@@ -36,7 +36,7 @@ AccountRequestSignature ::= SEQUENCE {
 }
 
 AccountRequest ::= SEQUENCE {
-  userName  [0] VisibleString,       -- E.g., "maria"
+  userName  [0] UTF8String,          -- E.g., "maria"
   locale    [1] VisibleString,       -- E.g., "es-ve"
   publicKey [2] SubjectPublicKeyInfo -- From the X.509 spec
 }
@@ -56,9 +56,9 @@ The ASN.1 `AccountCreation` structure is defined as follows:
 
 ```asn1
 AccountCreation ::= SEQUENCE {
-  requestedUserName [0] VisibleString, -- E.g., "maria"
+  requestedUserName [0] UTF8String,    -- E.g., "maria"
   locale            [1] VisibleString, -- E.g., "es-ve"
-  assignedUserId    [2] VisibleString, -- E.g., "maria@guarapo.cafe"
+  assignedUserId    [2] UTF8String,    -- E.g., "maria@guarapo.cafe"
   veraidBundle      [3] OCTET STRING
 }
 ```
