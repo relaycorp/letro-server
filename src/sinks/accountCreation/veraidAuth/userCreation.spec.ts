@@ -77,7 +77,7 @@ describe('createVeraidUser', () => {
       await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger);
 
       const creationInput = client.getSentCommandInput(0, MemberCreationCommand);
-      expect(creationInput.endpoint).toBe(`/orgs/${ORG_NAME}`);
+      expect(creationInput.endpoint).toBe(`/orgs/${ORG_NAME}/members`);
     });
 
     test('User role should be regular', async () => {

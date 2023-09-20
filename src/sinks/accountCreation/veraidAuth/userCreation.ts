@@ -20,8 +20,8 @@ const USER_NAME_TAKEN_STATUS_CODE = 409;
 const USER_NAME_SUFFIX_LENGTH = 3;
 const MAX_USER_CREATION_ATTEMPTS = 3;
 
-const ORG_ENDPOINT_BY_DOMAIN: { [key in string]: string } = Object.fromEntries(
-  MANAGED_DOMAIN_NAMES.map((domain) => [domain, `/orgs/${domain}`]),
+const ORG_MEMBERS_ENDPOINT_BY_DOMAIN: { [key in string]: string } = Object.fromEntries(
+  MANAGED_DOMAIN_NAMES.map((domain) => [domain, `/orgs/${domain}/members`]),
 ) as { [key in string]: string };
 
 interface UserCreationOutput {
@@ -43,7 +43,7 @@ async function createUserWithRetries(
   attempts = 1,
 ): Promise<{ userName: string; output: MemberCreationOutput }> {
   const userName = attempts === 1 ? preferredUserName : addNameSuffix(preferredUserName);
-  const orgEndpoint = ORG_ENDPOINT_BY_DOMAIN[org];
+  const orgEndpoint = ORG_MEMBERS_ENDPOINT_BY_DOMAIN[org];
   const creationCommand = new MemberCreationCommand({
     name: userName,
     endpoint: orgEndpoint,
