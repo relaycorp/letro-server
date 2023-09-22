@@ -11,6 +11,7 @@ const RESERVED_WORDS = [
   'relaycorp',
   'awala',
   'letro',
+  'vera', // Covers VeraId
   'gusnarea',
   'gustavonarea',
   'gnarea',
