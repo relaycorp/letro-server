@@ -32,6 +32,8 @@ spec:
               value: mongodb://$(MONGODB_USERNAME):$(MONGODB_PASSWORD)@mongodb.default
             - name: VAUTH_API_URL
               value: http://veraid-authority.example
+            - name: VAUTH_API_AUDIENCE
+              value: http://veraid-authority-audience.example
 
           envFrom:
             - configMapRef:
