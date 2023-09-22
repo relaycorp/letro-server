@@ -2,14 +2,14 @@ import type { AuthorityClient } from '@relaycorp/veraid-authority';
 
 import { VeraidAuthClientMaker } from '../../../utilities/VeraidAuthClientMaker.js';
 
-import { VAUTH_API_URL } from './stubs.js';
+import { VAUTH_API_AUDIENCE, VAUTH_API_URL } from './stubs.js';
 import { MockAuthorityClient } from './MockAuthorityClient.js';
 
 class MockClientMaker extends VeraidAuthClientMaker {
   public readonly clients: MockAuthorityClient[] = [];
 
   public constructor() {
-    super(VAUTH_API_URL);
+    super(VAUTH_API_URL, VAUTH_API_AUDIENCE);
   }
 
   public reset(): void {

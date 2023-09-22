@@ -2,7 +2,11 @@ import { jest } from '@jest/globals';
 import envVar from 'env-var';
 
 import { configureMockEnvVars } from '../testUtils/envVars.js';
-import { VAUTH_TOKEN, VAUTH_API_URL } from '../testUtils/veraid/authority/stubs.js';
+import {
+  VAUTH_TOKEN,
+  VAUTH_API_URL,
+  VAUTH_API_AUDIENCE,
+} from '../testUtils/veraid/authority/stubs.js';
 
 const mockGetGoogleIdToken = jest.fn<() => Promise<string>>().mockResolvedValue(VAUTH_TOKEN);
 jest.unstable_mockModule('./googleAuthn.js', () => ({
@@ -21,23 +25,22 @@ jest.unstable_mockModule('@relaycorp/veraid-authority', () => ({
 const { VeraidAuthClientMaker } = await import('./VeraidAuthClientMaker.js');
 
 describe('Maker', () => {
-  const mockEnvVars = configureMockEnvVars({ VAUTH_API_URL });
+  const baseEnvVars = { VAUTH_API_URL, VAUTH_API_AUDIENCE };
+  const mockEnvVars = configureMockEnvVars(baseEnvVars);
 
   describe('init', () => {
-    test('Environment variable VAUTH_API_URL should be defined', () => {
-      mockEnvVars({ VAUTH_API_URL: undefined });
+    test.each(['VAUTH_API_URL', 'VAUTH_API_AUDIENCE'])(
+      'Environment variable %s should be defined',
+      (envVarName) => {
+        mockEnvVars({ ...baseEnvVars, [envVarName]: undefined });
 
-      expect(() => VeraidAuthClientMaker.init()).toThrowWithMessage(
-        envVar.EnvVarError,
-        /VAUTH_API_URL/u,
-      );
-    });
-
-    test('Token audience should use VAUTH_API_URL', () => {
-      const authority = VeraidAuthClientMaker.init();
-
-      expect(authority.authnTokenAudience).toBe(VAUTH_API_URL);
-    });
+        expect(() => VeraidAuthClientMaker.init()).toThrowWithMessage(
+          envVar.EnvVarError,
+          // eslint-disable-next-line security/detect-non-literal-regexp
+          new RegExp(envVarName, 'u'),
+        );
+      },
+    );
   });
 
   describe('make', () => {
@@ -46,7 +49,7 @@ describe('Maker', () => {
 
       await authority.make();
 
-      expect(mockGetGoogleIdToken).toHaveBeenCalledWith(VAUTH_API_URL);
+      expect(mockGetGoogleIdToken).toHaveBeenCalledWith(VAUTH_API_AUDIENCE);
     });
 
     test('Client should connect to the specified API URL', async () => {
