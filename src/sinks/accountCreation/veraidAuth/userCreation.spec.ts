@@ -14,7 +14,7 @@ import {
   MockAuthorityClient,
 } from '../../../testUtils/veraid/authority/MockAuthorityClient.js';
 import { getPromiseRejection } from '../../../testUtils/jest.js';
-import { LETRO_OID } from '../../../utilities/letro.js';
+import { LETRO_VERAID_SVC_OID } from '../../../utilities/letro.js';
 import { bufferToArrayBuffer } from '../../../utilities/buffer.js';
 import {
   MEMBER_BUNDLE,
@@ -268,7 +268,7 @@ describe('createVeraidUser', () => {
       await createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger);
 
       const importInput = client.getSentCommandInput(1, MemberPublicKeyImportCommand);
-      expect(importInput.serviceOid).toBe(LETRO_OID);
+      expect(importInput.serviceOid).toBe(LETRO_VERAID_SVC_OID);
     });
 
     test('Key import should be logged', async () => {

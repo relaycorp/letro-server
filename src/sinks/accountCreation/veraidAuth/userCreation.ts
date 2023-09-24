@@ -12,7 +12,7 @@ import {
 } from '@relaycorp/veraid-authority';
 import type { BaseLogger } from 'pino';
 
-import { LETRO_OID } from '../../../utilities/letro.js';
+import { LETRO_VERAID_SVC_OID } from '../../../utilities/letro.js';
 
 import { MANAGED_DOMAIN_NAMES } from './orgs.js';
 
@@ -77,7 +77,7 @@ async function importKey(
   const keyImportCommand = new MemberPublicKeyImportCommand({
     endpoint: publicKeysEndpoint,
     publicKeyDer: Buffer.from(publicKeyDer),
-    serviceOid: LETRO_OID,
+    serviceOid: LETRO_VERAID_SVC_OID,
   });
   const { bundle: bundleEndpoint } = await client.send(keyImportCommand);
   logger.debug('Public key imported in VeraId Authority');
