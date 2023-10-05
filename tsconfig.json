@@ -6,6 +6,5 @@
     "rootDir": ".",
     "module": "esnext",
   },
-  "include": ["src/**/*.ts", "src/**/*.cjs", "node_modules/emojilib/dist/emoji-en-US.json"],
-  "exclude": ["node_modules", "build"]
+  "include": ["src/**/*.ts", "src/**/*.cjs"]
 }

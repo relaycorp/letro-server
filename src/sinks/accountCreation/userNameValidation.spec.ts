@@ -24,6 +24,13 @@ describe('sanitiseUserName', () => {
     expect(sanitiseUserName('MAÑANA')).toBe('mañana');
   });
 
+  test('Non-printable characters should be refused', () => {
+    // eslint-disable-next-line unicorn/no-hex-escape
+    expect(sanitiseUserName('\x00')).toMatch(GENERATED_NAME_REGEX);
+    // eslint-disable-next-line unicorn/no-hex-escape
+    expect(sanitiseUserName('\x00\x00')).toMatch(GENERATED_NAME_REGEX);
+  });
+
   test.each(['hey-👋', '🇦🇶-cold', '😍🇮🇸'])(
     'Emojis-containing names like "%s" should be valid',
     (name) => {
