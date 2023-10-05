@@ -1,8 +1,11 @@
+// @ts-expect-error: No types available
+import emojilib from 'emojilib';
 import { remove as replaceAsciiLookalike } from 'confusables';
 import { generateUsername } from 'unique-username-generator';
 
 const MAX_USERNAME_LENGTH = 16;
 const ILLICIT_CHARS_REGEX = /[\s@]/gu;
+const SINGLE_LETTER_REGEX = /^\p{Letter}$/u;
 
 const RESERVED_WORDS = [
   'admin',
@@ -17,7 +20,16 @@ const RESERVED_WORDS = [
   'gnarea',
 ];
 
+function isEmoji(string: string) {
+  return Object.hasOwn(emojilib as object, string);
+}
+
 function isUserNameValid(string: string): boolean {
+  if (isEmoji(string) || SINGLE_LETTER_REGEX.test(string)) {
+    // The `confusables` library doesn't handle single-character, non-ASCII strings
+    return true;
+  }
+
   const sanitisedString = replaceAsciiLookalike(string).replaceAll(/[^a-z\d]/gu, '');
   if (sanitisedString.length === 0) {
     return false;

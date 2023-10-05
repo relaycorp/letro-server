@@ -3,8 +3,9 @@
   "compilerOptions": {
     "emitDecoratorMetadata": true,
     "outDir": "build",
-    "rootDir": "src",
+    "rootDir": ".",
     "module": "esnext",
   },
-  "include": ["src/**/*.ts", "src/**/*.cjs"]
+  "include": ["src/**/*.ts", "src/**/*.cjs", "node_modules/emojilib/dist/emoji-en-US.json"],
+  "exclude": ["node_modules", "build"]
 }

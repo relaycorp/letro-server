@@ -13,7 +13,7 @@ describe('sanitiseUserName', () => {
     expect(sanitiseUserName(name)).toBe(name);
   });
 
-  test('Unicode characters should be allowed', () => {
+  test('Non-ASCII characters should be allowed', () => {
     const name = 'こんにちは';
     expect(sanitiseUserName(name)).toBe(name);
   });
@@ -24,8 +24,14 @@ describe('sanitiseUserName', () => {
     expect(sanitiseUserName('MAÑANA')).toBe('mañana');
   });
 
-  test('Emojis should be valid', () => {
-    const name = 'hey-👋';
+  test.each(['hey-👋', '🇦🇶-cold', '😍🇮🇸'])(
+    'Emojis-containing names like "%s" should be valid',
+    (name) => {
+      expect(sanitiseUserName(name)).toBe(name);
+    },
+  );
+
+  test.each(['a', '你', '🍕', '2'])('Single-character names like "%s" should be valid', (name) => {
     expect(sanitiseUserName(name)).toBe(name);
   });
 

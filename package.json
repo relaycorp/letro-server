@@ -31,6 +31,7 @@
     "cloudevents": "^7.0.1",
     "confusables": "^1.1.1",
     "date-fns": "^2.30.0",
+    "emojilib": "^3.0.11",
     "env-var": "^7.3.0",
     "fastify": "^4.22.0",
     "fastify-plugin": "^4.5.0",
