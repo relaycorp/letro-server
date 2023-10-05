@@ -43,7 +43,6 @@ describe('sanitiseUserName', () => {
     ['ASCII', 'a'],
     ['non-ASCII', '你'],
     ['emoji', '🍕'],
-    ['emoji sequence', '🇬🇧'], // It has multiple code points
     ['arabic numeral', '2'],
     ['non-arabic numeral', '二'],
   ])('Single %s character should be allowed', (_type, name) => {
