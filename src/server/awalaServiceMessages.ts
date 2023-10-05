@@ -4,18 +4,24 @@ import type { FastifyInstance, RouteOptions } from 'fastify';
 import { HTTP_STATUS_CODES } from '../utilities/http.js';
 import type { PluginDone } from '../utilities/fastify/PluginDone.js';
 import { convertMessageToEvent } from '../utilities/eventing/receiver.js';
-import type { MessageSink, MessageSinkHandler } from '../incomingMessageSinks/sinkTypes.js';
-import accountCreation from '../incomingMessageSinks/accounts/accountCreation.js';
-import accountLinking from '../incomingMessageSinks/accounts/accountLinking.js';
+import type { MessageSink, MessageSinkHandler } from '../sinks/types.js';
+import accountCreation from '../sinks/accountCreation/accountCreation.js';
+import connParamsRetrieval from '../sinks/connectionParamsRetrieval/connectionParamsRetrieval.js';
 import { Emitter } from '../utilities/eventing/Emitter.js';
 import {
   type IncomingServiceMessage,
   makeIncomingServiceMessage,
 } from '../utilities/awalaEndpoint.js';
-import pairingRequestTmp from '../incomingMessageSinks/contactPairing/pairingRequestTmp.js';
-import pairingAuthTmp from '../incomingMessageSinks/contactPairing/pairingAuthTmp.js';
+import pairingRequestTmp from '../sinks/contactPairing/pairingRequestTmp.js';
+import pairingAuthTmp from '../sinks/contactPairing/pairingAuthTmp.js';
+import { VeraidAuthClientMaker } from '../utilities/VeraidAuthClientMaker.js';
 
-const SINKS: MessageSink[] = [accountCreation, accountLinking, pairingRequestTmp, pairingAuthTmp];
+const SINKS: MessageSink[] = [
+  accountCreation,
+  connParamsRetrieval,
+  pairingRequestTmp,
+  pairingAuthTmp,
+];
 const HANDLER_BY_TYPE: { [contentType: string]: MessageSinkHandler } = SINKS.reduce(
   (acc, sink) => ({ ...acc, [sink.contentType]: sink.handler }),
   {},
@@ -32,6 +38,7 @@ export default function registerRoutes(
   });
 
   const emitter = Emitter.init();
+  const veraidAuthClientMaker = VeraidAuthClientMaker.init();
   fastify.route({
     method: ['POST'],
     url: '/',
@@ -69,6 +76,7 @@ export default function registerRoutes(
         emitter,
         logger: parcelAwareLogger,
         dbConnection: fastify.mongoose,
+        veraidAuthClientMaker,
       };
       const wasFulfilled = await handler(message, context);
       const responseCode = wasFulfilled

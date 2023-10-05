@@ -4,8 +4,8 @@ import { secondsInDay } from 'date-fns';
 const TTL_DAYS = 90;
 const TTL_SECONDS = secondsInDay * TTL_DAYS;
 
-@index({ requesterVeraId: 1, targetVeraId: 1 }, { unique: true })
 @modelOptions({ schemaOptions: { timestamps: { createdAt: 'creationDate', updatedAt: false } } })
+@index({ requesterVeraId: 1, targetVeraId: 1 }, { unique: true })
 @index({ creationDate: 1 }, { expireAfterSeconds: TTL_SECONDS })
 export class ContactPairingRequest {
   /**

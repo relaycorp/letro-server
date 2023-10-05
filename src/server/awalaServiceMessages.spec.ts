@@ -8,11 +8,11 @@ import { partialPinoLog, type MockLogSet } from '../testUtils/logging.js';
 import { mockSpy } from '../testUtils/jest.js';
 import { mockEmitter } from '../testUtils/eventing/mockEmitter.js';
 import { CE_CONTENT_TYPE, CE_DATA, CE_ID, CE_SOURCE } from '../testUtils/eventing/stubs.js';
-import type { MessageSinkHandler } from '../incomingMessageSinks/sinkTypes.js';
+import type { MessageSinkHandler } from '../sinks/types.js';
 import type { IncomingServiceMessage } from '../utilities/awalaEndpoint.js';
 
 const mockHandler: jest.Mock<MessageSinkHandler> = mockSpy(jest.fn());
-jest.unstable_mockModule('../incomingMessageSinks/accounts/accountCreation.js', () => ({
+jest.unstable_mockModule('../sinks/accountCreation/accountCreation.js', () => ({
   default: { contentType: CE_CONTENT_TYPE, handler: mockHandler },
 }));
 const { makeTestServer } = await import('../testUtils/server.js');
