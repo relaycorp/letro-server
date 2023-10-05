@@ -174,6 +174,8 @@ describe('accountCreation handler', () => {
 
     expect(logs).toContainEqual(
       partialPinoLog('info', 'Account created', {
+        requestedUserName: USER_NAME,
+        locale: LOCALE,
         userId: `${USER_NAME}@${getDomainForLocale(LOCALE)}`,
       }),
     );
@@ -248,6 +250,8 @@ describe('accountCreation handler', () => {
     expect(logs).toContainEqual(
       partialPinoLog('error', 'Failed to create user', {
         err: expect.objectContaining({ message: error.message }),
+        requestedUserName: USER_NAME,
+        locale: LOCALE,
       }),
     );
   });

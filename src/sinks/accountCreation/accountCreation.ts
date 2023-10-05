@@ -85,15 +85,19 @@ const accountCreation: MessageSink = {
     if (request === null) {
       return true;
     }
+    const requestAwareLogger = logger.child({
+      requestedUserName: request.userName,
+      locale: request.locale,
+    });
 
-    const user = await createUser(request, veraidAuthClientMaker, logger);
+    const user = await createUser(request, veraidAuthClientMaker, requestAwareLogger);
     if (user === null) {
       return false;
     }
 
     const userId = `${user.userName}@${user.domainName}`;
     await sendAccountCreationMessage(request, userId, user.bundle, message, emitter);
-    logger.info({ userId }, 'Account created');
+    requestAwareLogger.info({ userId }, 'Account created');
     return true;
   },
 };

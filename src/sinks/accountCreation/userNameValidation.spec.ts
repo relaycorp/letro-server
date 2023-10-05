@@ -13,7 +13,7 @@ describe('sanitiseUserName', () => {
     expect(sanitiseUserName(name)).toBe(name);
   });
 
-  test('Unicode characters should be allowed', () => {
+  test('Non-ASCII characters should be allowed', () => {
     const name = 'こんにちは';
     expect(sanitiseUserName(name)).toBe(name);
   });
@@ -24,8 +24,29 @@ describe('sanitiseUserName', () => {
     expect(sanitiseUserName('MAÑANA')).toBe('mañana');
   });
 
-  test('Emojis should be valid', () => {
-    const name = 'hey-👋';
+  test('Non-printable characters should be refused', () => {
+    // eslint-disable-next-line unicorn/no-hex-escape
+    expect(sanitiseUserName('\x00')).toMatch(GENERATED_NAME_REGEX);
+    // eslint-disable-next-line unicorn/no-hex-escape
+    expect(sanitiseUserName('\x00\x00')).toMatch(GENERATED_NAME_REGEX);
+  });
+
+  test.each(['hey-👋', '🇦🇶-cold', '😍🇮🇸'])(
+    'Emojis-containing names like "%s" should be valid',
+    (name) => {
+      expect(sanitiseUserName(name)).toBe(name);
+    },
+  );
+
+  test.each([
+    // eslint-disable-next-line unicorn/text-encoding-identifier-case
+    ['ASCII', 'a'],
+    ['non-ASCII', '你'],
+    ['emoji', '🍕'],
+    ['emoji sequence', '🇬🇧'], // It has multiple code points
+    ['arabic numeral', '2'],
+    ['non-arabic numeral', '二'],
+  ])('Single %s character should be allowed', (_type, name) => {
     expect(sanitiseUserName(name)).toBe(name);
   });
 

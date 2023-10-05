@@ -1,5 +1,10 @@
 const RELAYCORP_OID = '1.3.6.1.4.1.58708';
-export const LETRO_OID = `${RELAYCORP_OID}.2`;
+const LETRO_OID = `${RELAYCORP_OID}.2`;
+
+/**
+ * OID of Letro as a VeraId service.
+ */
+export const LETRO_VERAID_SVC_OID = `${LETRO_OID}.0`;
 
 export const RELAYCORP_LETRO_TYPES = {
   ACCOUNT_CREATION: 'application/vnd.relaycorp.letro.account-creation',
