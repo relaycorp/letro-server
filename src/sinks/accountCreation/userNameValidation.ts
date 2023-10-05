@@ -3,7 +3,7 @@ import { generateUsername } from 'unique-username-generator';
 
 const MAX_USERNAME_LENGTH = 16;
 const ILLICIT_CHARS_REGEX = /[\s@]/gu;
-const SINGLE_EMOJI_REGEX = /^\p{Emoji_Presentation}$/gu;
+const SINGLE_EMOJI_REGEX = /^\p{Emoji_Presentation}+$/gu;
 const SINGLE_LETTER_REGEX = /^\p{Letter}$/u;
 
 const RESERVED_WORDS = [
