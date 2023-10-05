@@ -31,7 +31,14 @@ describe('sanitiseUserName', () => {
     },
   );
 
-  test.each(['a', '你', '🍕', '2'])('Single-character names like "%s" should be valid', (name) => {
+  test.each([
+    // eslint-disable-next-line unicorn/text-encoding-identifier-case
+    ['ASCII', 'a'],
+    ['non-ASCII', '你'],
+    ['emoji', '🍕'],
+    ['arabic numeral', '2'],
+    ['non-arabic numeral', '二'],
+  ])('Single %s character should be allowed', (_type, name) => {
     expect(sanitiseUserName(name)).toBe(name);
   });
 
