@@ -1,5 +1,5 @@
 // @ts-expect-error: No types available
-import emojilib from 'emojilib';
+import emojilib from 'emojilib' assert { type: 'json' };
 import { remove as replaceAsciiLookalike } from 'confusables';
 import { generateUsername } from 'unique-username-generator';
 
