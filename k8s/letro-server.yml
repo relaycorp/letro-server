@@ -18,6 +18,8 @@ spec:
               path: /
             initialDelaySeconds: 1
           env:
+            - name: MONGODB_URI
+              value: mongodb://mongodb.default
             - name: MONGODB_USERNAME
               valueFrom:
                 configMapKeyRef:
@@ -28,8 +30,8 @@ spec:
                 secretKeyRef:
                   name: credentials
                   key: mongodb_password
-            - name: MONGODB_URI
-              value: mongodb://$(MONGODB_USERNAME):$(MONGODB_PASSWORD)@mongodb.default
+            - name: MONGODB_DB
+              value: letro
             - name: VAUTH_API_URL
               value: http://veraid-authority.example
             - name: VAUTH_API_AUDIENCE
