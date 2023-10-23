@@ -44,6 +44,7 @@ describe('sanitiseUserName', () => {
     ['non-ASCII', '你'],
     ['emoji', '🍕'],
     ['emoji sequence', '🇬🇧'],
+    ['emoji sequence with zero-width joiner', '👨‍👩‍👦'],
     ['arabic numeral', '2'],
     ['non-arabic numeral', '二'],
   ])('Single %s character should be allowed', (_type, name) => {
