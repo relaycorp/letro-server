@@ -28,7 +28,7 @@
     "@relaycorp/relaynet-core": "^1.87.0",
     "@relaycorp/veraid-authority": "^1.9.1",
     "@typegoose/typegoose": "^11.3.0",
-    "cloudevents": "^7.0.1",
+    "cloudevents": "^8.0.0",
     "confusables": "^1.1.1",
     "date-fns": "^2.30.0",
     "env-var": "^7.3.0",
