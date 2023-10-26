@@ -8,7 +8,7 @@ import {
 } from '../../utilities/awalaEndpoint.js';
 import { RELAYCORP_LETRO_TYPES } from '../../utilities/letro.js';
 import type { Emitter } from '../../utilities/eventing/Emitter.js';
-import type { VeraidAuthClientMaker } from '../../utilities/VeraidAuthClientMaker.js';
+import type { VeraidAuthClientMaker } from '../../utilities/veraid/VeraidAuthClientMaker.js';
 
 import { AccountRequestSignature } from './schemas/AccountRequestSignature.js';
 import { createVeraidUser, type UserCreationOutput } from './veraidAuth/userCreation.js';

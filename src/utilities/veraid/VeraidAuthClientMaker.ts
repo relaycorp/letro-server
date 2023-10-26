@@ -1,7 +1,7 @@
 import { AuthorityClient } from '@relaycorp/veraid-authority';
 import envVar from 'env-var';
 
-import { getGoogleIdToken } from './googleAuthn.js';
+import { getGoogleIdToken } from '../googleAuthn.js';
 
 export class VeraidAuthClientMaker {
   public static init(): VeraidAuthClientMaker {

@@ -1,6 +1,6 @@
 import type { AuthorityClient } from '@relaycorp/veraid-authority';
 
-import { VeraidAuthClientMaker } from '../../../utilities/VeraidAuthClientMaker.js';
+import { VeraidAuthClientMaker } from '../../../utilities/veraid/VeraidAuthClientMaker.js';
 
 import { VAUTH_API_AUDIENCE, VAUTH_API_URL } from './stubs.js';
 import { MockAuthorityClient } from './MockAuthorityClient.js';

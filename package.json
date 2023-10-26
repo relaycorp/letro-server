@@ -26,6 +26,7 @@
     "@relaycorp/cloudevents-transport": "^1.3.0",
     "@relaycorp/pino-cloud": "^1.0.28",
     "@relaycorp/relaynet-core": "^1.87.0",
+    "@relaycorp/veraid": "^1.15.0",
     "@relaycorp/veraid-authority": "^1.9.1",
     "@typegoose/typegoose": "^11.3.0",
     "cloudevents": "^7.0.1",

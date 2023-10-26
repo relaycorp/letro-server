@@ -14,7 +14,7 @@ import {
 } from '../utilities/awalaEndpoint.js';
 import pairingRequestTmp from '../sinks/contactPairing/pairingRequestTmp.js';
 import pairingAuthTmp from '../sinks/contactPairing/pairingAuthTmp.js';
-import { VeraidAuthClientMaker } from '../utilities/VeraidAuthClientMaker.js';
+import { VeraidAuthClientMaker } from '../utilities/veraid/VeraidAuthClientMaker.js';
 
 const SINKS: MessageSink[] = [
   accountCreation,
