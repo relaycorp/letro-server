@@ -10,8 +10,6 @@ Contact pairing is a two-phase process due to Awala's E2E encryption and pre-aut
 1. The two parties exchange [_pairing requests_](#contact-pairing-request). The order in which requests are received is irrelevant, as the server will wait until both have been received before exchanging them.
 2. The two parties exchange [_pairing authorisations_](#contact-pairing-authorisation). The order in which authorisations are received is irrelevant, as the server will forward them as they are received.
 
-Note that pairing requests are signed with [VeraId](https://veraid.net), and therefore it is impossible for the server to forge or tamper with them. Worst case scenario, if the server were compromised, it could only prevent pairing requests from being forwarded.
-
 The diagram below illustrates the process above:
 
 ![Contact pairing diagram](./assets/contact-pairing.svg)
@@ -46,6 +44,10 @@ This message encapsulates the Awala _connection parameters_ whereby a Letro user
 - Recipient: Both server and user agent.
 - Content type: `application/vnd.relaycorp.letro.pairing-auth`.
 - Content: An Awala endpoint's connection parameters binary. For example, the output from `FirstPartyEndpoint.authorizeIndefinitely()` in the Awala Android SDK.
+
+## Security considerations
+
+Since pairing requests are signed with [VeraId](https://veraid.net), it's not possible for the server to forge or tamper with them. Worst case scenario, if the server were compromised, it could only prevent pairing requests from being forwarded.
 
 ## Data persistence
 
