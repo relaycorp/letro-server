@@ -22,8 +22,8 @@ The two parties will then be able to communicate with each other using the Awala
 
 This message signifies a Letro user's intention to pair with another user.
 
-- Recipient: Letro server.
-- Content type: `application/vnd.relaycorp.letro.pairing-request`.
+- Recipient: Both server and user agent.
+- Content type: `application/vnd.relaycorp.letro.contact-pairing.request`.
 - Content: A DER-serialised [VeraId `SignatureBundle`](https://veraid.net/specs/v1) encapsulating a `ContactPairingRequest` structure (see below).
 
 The ASN.1 `ContactPairingRequest` structure is defined as follows:
@@ -31,11 +31,14 @@ The ASN.1 `ContactPairingRequest` structure is defined as follows:
 ```asn1
 ContactPairingRequest ::= SEQUENCE {
   requesterAwalaEndpointPublicKey [0] SubjectPublicKeyInfo -- From the X.509 spec
-  prospectiveContactVeraid        [1] UTF8String,          -- E.g., "maria@example.com"
+  prospectiveContactVeraid        [1] UTF8String           -- E.g., "maria@example.com"
 }
 ```
 
-`ContactPairingRequest.requesterAwalaEndpointPublicKey` MUST correspond to the Awala endpoint that sent the service message.
+The following MUST also be true, or else the pairing request will be rejected and a [`ContactPairingFailure` message](#contact-pairing-failure) will be sent to the requester:
+
+- `requesterAwalaEndpointPublicKey` corresponds to the Awala endpoint that sent the service message.
+- `prospectiveContactVeraid` is a well-formed VeraId identifier (e.g., `maria@example.com`, `example.com`).
 
 ### Contact pairing authorisation
 
@@ -44,6 +47,23 @@ This message encapsulates the Awala _connection parameters_ whereby a Letro user
 - Recipient: Both server and user agent.
 - Content type: `application/vnd.relaycorp.letro.pairing-auth`.
 - Content: An Awala endpoint's connection parameters binary. For example, the output from `FirstPartyEndpoint.authorizeIndefinitely()` in the Awala Android SDK.
+
+### Contact pairing failure
+
+This message signifies that a pairing request has failed.
+
+- Recipient: User agent.
+- Content type: `application/vnd.relaycorp.letro.contact-pairing.failure`.
+- Content: A DER-serialised `ContactPairingFailure` structure (see below).
+
+The ASN.1 `ContactPairingFailure` structure is defined as follows:
+
+```asn1
+ContactPairingFailure ::= SEQUENCE {
+  prospectiveContactVeraid [0] UTF8String,  -- E.g., "maria@example.com"
+  reason                   [1] VisibleString
+}
+```
 
 ## Security considerations
 
