@@ -3,11 +3,6 @@ import { randomUUID } from 'node:crypto';
 import { CloudEvent, type CloudEventV1 } from 'cloudevents';
 import { addMonths } from 'date-fns';
 
-const INCOMING_SERVICE_MESSAGE_TYPE =
-  'tech.relaycorp.awala.endpoint-internet.incoming-service-message';
-const OUTGOING_SERVICE_MESSAGE_TYPE =
-  'tech.relaycorp.awala.endpoint-internet.outgoing-service-message';
-
 const OUTGOING_MESSAGE_TTL_MONTHS = 3;
 
 interface ServiceMessage {
@@ -16,6 +11,11 @@ interface ServiceMessage {
   readonly contentType: string;
   readonly content: Buffer;
 }
+
+const INCOMING_SERVICE_MESSAGE_TYPE =
+  'tech.relaycorp.awala.endpoint-internet.incoming-service-message';
+export const OUTGOING_SERVICE_MESSAGE_TYPE =
+  'tech.relaycorp.awala.endpoint-internet.outgoing-service-message';
 
 export interface OutgoingServiceMessage extends ServiceMessage {
   readonly parcelId?: string;

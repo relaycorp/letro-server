@@ -31,4 +31,10 @@ export class ContactPairingRequest {
    */
   @prop({ required: true })
   public requesterIdKey!: Buffer;
+
+  /**
+   * The VeraId Signature Bundle that encapsulates the contact pairing request from the requester.
+   */
+  @prop()
+  public signatureBundle?: Buffer;
 }

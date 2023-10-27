@@ -3,7 +3,7 @@ import type { Connection } from 'mongoose';
 
 import type { Emitter } from '../utilities/eventing/Emitter.js';
 import type { IncomingServiceMessage } from '../utilities/awalaEndpoint.js';
-import type { VeraidAuthClientMaker } from '../utilities/VeraidAuthClientMaker.js';
+import type { VeraidAuthClientMaker } from '../utilities/veraid/VeraidAuthClientMaker.js';
 
 interface MessageSinkHandlerContext {
   readonly logger: FastifyBaseLogger;

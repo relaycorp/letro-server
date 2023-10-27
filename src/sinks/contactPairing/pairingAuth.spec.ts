@@ -14,7 +14,7 @@ import { addDays } from 'date-fns';
 import { makeSinkTestRunner } from '../../testUtils/messageSinks.js';
 import { partialPinoLog } from '../../testUtils/logging.js';
 
-import pairingAuthTmp from './pairingAuthTmp.js';
+import pairingAuth from './pairingAuth.js';
 
 const granterIdentityKeyPair = await generateRSAKeyPair();
 const granterCert = await issueEndpointCertificate({
@@ -31,15 +31,15 @@ const pda = await issueDeliveryAuthorization({
 });
 const sessionKeyPair = await SessionKeyPair.generate();
 
-describe('pairingCompletionTmp', () => {
-  const {
-    logs,
-    emittedEvents,
-    senderEndpointId,
-    recipientEndpointId: ownEndpointId,
-    runner,
-  } = makeSinkTestRunner(pairingAuthTmp);
+const {
+  logs,
+  emittedEvents,
+  senderEndpoint,
+  recipientEndpointId: ownEndpointId,
+  runner,
+} = await makeSinkTestRunner(pairingAuth);
 
+describe('pairingCompletionTmp', () => {
   test('Malformed connection params should be refused', async () => {
     await expect(runner(Buffer.from('malformed'))).resolves.toBeTrue();
 
@@ -62,7 +62,7 @@ describe('pairingCompletionTmp', () => {
 
     expect(logs).toContainEqual(
       partialPinoLog('info', 'Refused connection params not issued by sender', {
-        messageSenderId: senderEndpointId,
+        messageSenderId: senderEndpoint.id,
         granterId: await getIdFromIdentityKey(granterIdentityKeyPair.publicKey),
       }),
     );
@@ -88,7 +88,7 @@ describe('pairingCompletionTmp', () => {
       expect.objectContaining<Partial<CloudEventV1<any>>>({
         source: ownEndpointId,
         subject: granteeEndpointId,
-        datacontenttype: pairingAuthTmp.contentType,
+        datacontenttype: pairingAuth.contentType,
         // eslint-disable-next-line @typescript-eslint/naming-convention,camelcase
         data_base64: connectionParamsSerialised.toString('base64'),
       }),

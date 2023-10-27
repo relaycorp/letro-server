@@ -1,3 +1,6 @@
+---
+nav_order: 0
+---
 # Letro's VeraId integration server
 
 This server is part of a [centralised Awala service](https://awala.network/service-providers/implementation/architecture#centralised-service) that integrates [VeraId](https://veraid.net) in Relaycorp's [Letro](https://letro.app/en) user agents, such as [Letro for Android](https://github.com/relaycorp/letro-android), in order to offer a superior user experience. The server supports the following modules:

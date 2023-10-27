@@ -3,11 +3,12 @@ import type { Connection } from 'mongoose';
 
 import type { MessageSink } from '../sinks/types.js';
 
-import { type MockLogSet, makeMockLogging } from './logging.js';
+import { makeMockLogging, type MockLogSet } from './logging.js';
 import { mockEmitter } from './eventing/mockEmitter.js';
 import { setUpTestDbConnection } from './db.js';
 import { mockClientMaker } from './veraid/authority/clientMaker.js';
 import { configureMockEnvVars, REQUIRED_ENV_VARS } from './envVars.js';
+import { type Endpoint, generateEndpoint } from './awala.js';
 
 interface TestRunnerOptions {
   readonly senderEndpointId: string;
@@ -18,20 +19,20 @@ interface TestRunnerContext {
   readonly emittedEvents: CloudEvent[];
   readonly getDbConnection: () => Connection;
 
-  readonly senderEndpointId: string;
+  readonly senderEndpoint: Endpoint;
   readonly recipientEndpointId: string;
 
   readonly runner: (content: Buffer, options?: Partial<TestRunnerOptions>) => Promise<boolean>;
 }
 
-export function makeSinkTestRunner(sink: MessageSink): TestRunnerContext {
+export async function makeSinkTestRunner(sink: MessageSink): Promise<TestRunnerContext> {
   const mockLogger = makeMockLogging();
   const emitter = mockEmitter();
   const getDbConnection = setUpTestDbConnection();
   const veraidAuthClientMaker = mockClientMaker();
 
-  const senderEndpointId = 'sender-endpoint-id';
-  const recipientEndpointId = 'recipient-endpoint-id';
+  const senderEndpoint = await generateEndpoint();
+  const recipientEndpointId = 'letro-server-endpoint-id';
 
   configureMockEnvVars(REQUIRED_ENV_VARS);
 
@@ -40,14 +41,14 @@ export function makeSinkTestRunner(sink: MessageSink): TestRunnerContext {
     emittedEvents: emitter.events,
     getDbConnection,
 
-    senderEndpointId,
+    senderEndpoint,
     recipientEndpointId,
 
     runner: async (content: Buffer, options) =>
       sink.handler(
         {
           parcelId: 'parcel id',
-          senderId: options?.senderEndpointId ?? senderEndpointId,
+          senderId: options?.senderEndpointId ?? senderEndpoint.id,
           recipientId: recipientEndpointId,
           contentType: sink.contentType,
           content,
