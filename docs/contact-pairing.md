@@ -59,19 +59,23 @@ This message signifies that a pairing request has failed.
 The ASN.1 `ContactPairingFailure` structure is defined as follows:
 
 ```asn1
-ContactPairingFailure :: INTEGER {
-  REQUESTER_AWALA_KEY_MISMATCH(0)
+ContactPairingFailureReason :: INTEGER {
+  INVALID_REQUESTER_VERAID(0),
+  INVALID_TARGET_VERAID(1),
+  INVALID_REQUESTER_AWALA_KEY(2)
 }
 
 ContactPairingFailure ::= SEQUENCE {
   prospectiveContactVeraid [0] UTF8String,  -- E.g., "maria@example.com"
-  reason                   [1] ContactPairingFailure
+  reason                   [1] ContactPairingFailureReason
 }
 ```
 
 Where the `ContactPairingFailure` can be one of the following:
 
-- `REQUESTER_AWALA_KEY_MISMATCH`: The requester's Awala endpoint public key does not correspond to the one that sent the service message.
+- `INVALID_REQUESTER_VERAID`: The requester's VeraId id is invalid (i.e., it's a domain name).
+- `INVALID_TARGET_VERAID`: The target's VeraId id is malformed or a domain name.
+- `INVALID_REQUESTER_AWALA_KEY`: The requester's Awala endpoint public key does not correspond to the one that sent the service message.
 
 ## Security considerations
 
