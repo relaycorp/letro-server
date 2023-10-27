@@ -14,7 +14,7 @@ import {
 } from '../utilities/awalaEndpoint.js';
 import pairingRequest from '../sinks/contactPairing/pairingRequest.js';
 import pairingRequestTmp from '../sinks/contactPairing/pairingRequestTmp.js';
-import pairingAuthTmp from '../sinks/contactPairing/pairingAuthTmp.js';
+import pairingAuth from '../sinks/contactPairing/pairingAuth.js';
 import { VeraidAuthClientMaker } from '../utilities/veraid/VeraidAuthClientMaker.js';
 
 const SINKS: MessageSink[] = [
@@ -22,7 +22,7 @@ const SINKS: MessageSink[] = [
   connParamsRetrieval,
   pairingRequest,
   pairingRequestTmp,
-  pairingAuthTmp,
+  pairingAuth,
 ];
 const HANDLER_BY_TYPE: { [contentType: string]: MessageSinkHandler } = SINKS.reduce(
   (acc, sink) => ({ ...acc, [sink.contentType]: sink.handler }),

@@ -14,7 +14,7 @@ import { addDays } from 'date-fns';
 import { makeSinkTestRunner } from '../../testUtils/messageSinks.js';
 import { partialPinoLog } from '../../testUtils/logging.js';
 
-import pairingAuthTmp from './pairingAuthTmp.js';
+import pairingAuth from './pairingAuth.js';
 
 const granterIdentityKeyPair = await generateRSAKeyPair();
 const granterCert = await issueEndpointCertificate({
@@ -37,7 +37,7 @@ const {
   senderEndpoint,
   recipientEndpointId: ownEndpointId,
   runner,
-} = await makeSinkTestRunner(pairingAuthTmp);
+} = await makeSinkTestRunner(pairingAuth);
 
 describe('pairingCompletionTmp', () => {
   test('Malformed connection params should be refused', async () => {
@@ -88,7 +88,7 @@ describe('pairingCompletionTmp', () => {
       expect.objectContaining<Partial<CloudEventV1<any>>>({
         source: ownEndpointId,
         subject: granteeEndpointId,
-        datacontenttype: pairingAuthTmp.contentType,
+        datacontenttype: pairingAuth.contentType,
         // eslint-disable-next-line @typescript-eslint/naming-convention,camelcase
         data_base64: connectionParamsSerialised.toString('base64'),
       }),

@@ -45,7 +45,7 @@ The following MUST also be true, or else the pairing request will be rejected an
 This message encapsulates the Awala _connection parameters_ whereby a Letro user (the granter) authorises another user (the grantee) to message them.
 
 - Recipient: Both server and user agent.
-- Content type: `application/vnd.relaycorp.letro.pairing-auth`.
+- Content type: `application/vnd.relaycorp.letro.contact-pairing.authorisation`.
 - Content: An Awala endpoint's connection parameters binary. For example, the output from `FirstPartyEndpoint.authorizeIndefinitely()` in the Awala Android SDK.
 
 ### Contact pairing failure
