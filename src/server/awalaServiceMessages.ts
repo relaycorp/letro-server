@@ -12,6 +12,7 @@ import {
   type IncomingServiceMessage,
   makeIncomingServiceMessage,
 } from '../utilities/awalaEndpoint.js';
+import pairingRequest from '../sinks/contactPairing/pairingRequest.js';
 import pairingRequestTmp from '../sinks/contactPairing/pairingRequestTmp.js';
 import pairingAuthTmp from '../sinks/contactPairing/pairingAuthTmp.js';
 import { VeraidAuthClientMaker } from '../utilities/veraid/VeraidAuthClientMaker.js';
@@ -19,6 +20,7 @@ import { VeraidAuthClientMaker } from '../utilities/veraid/VeraidAuthClientMaker
 const SINKS: MessageSink[] = [
   accountCreation,
   connParamsRetrieval,
+  pairingRequest,
   pairingRequestTmp,
   pairingAuthTmp,
 ];

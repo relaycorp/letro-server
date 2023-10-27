@@ -38,10 +38,10 @@ jest.unstable_mockModule('./veraidAuth/userCreation.js', () => ({
 
 const { default: accountCreation } = await import('./accountCreation.js');
 
-describe('accountCreation handler', () => {
-  const { emittedEvents, logs, senderEndpointId, recipientEndpointId, runner } =
-    makeSinkTestRunner(accountCreation);
+const { emittedEvents, logs, senderEndpoint, recipientEndpointId, runner } =
+  await makeSinkTestRunner(accountCreation);
 
+describe('accountCreation handler', () => {
   function makeRequest(options: Partial<AccountRequest> = {}): AccountRequest {
     const request = new AccountRequest();
     request.userName = options.userName ?? USER_NAME;
@@ -197,7 +197,7 @@ describe('accountCreation handler', () => {
     test('Recipient should be sender of account creation request', async () => {
       const event = await postRequestAndGetCreationMessage();
 
-      expect(event.subject).toBe(senderEndpointId);
+      expect(event.subject).toBe(senderEndpoint.id);
     });
 
     test('Content type should be that of account creation', async () => {

@@ -31,15 +31,15 @@ const pda = await issueDeliveryAuthorization({
 });
 const sessionKeyPair = await SessionKeyPair.generate();
 
-describe('pairingCompletionTmp', () => {
-  const {
-    logs,
-    emittedEvents,
-    senderEndpointId,
-    recipientEndpointId: ownEndpointId,
-    runner,
-  } = makeSinkTestRunner(pairingAuthTmp);
+const {
+  logs,
+  emittedEvents,
+  senderEndpoint,
+  recipientEndpointId: ownEndpointId,
+  runner,
+} = await makeSinkTestRunner(pairingAuthTmp);
 
+describe('pairingCompletionTmp', () => {
   test('Malformed connection params should be refused', async () => {
     await expect(runner(Buffer.from('malformed'))).resolves.toBeTrue();
 
@@ -62,7 +62,7 @@ describe('pairingCompletionTmp', () => {
 
     expect(logs).toContainEqual(
       partialPinoLog('info', 'Refused connection params not issued by sender', {
-        messageSenderId: senderEndpointId,
+        messageSenderId: senderEndpoint.id,
         granterId: await getIdFromIdentityKey(granterIdentityKeyPair.publicKey),
       }),
     );

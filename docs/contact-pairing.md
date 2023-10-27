@@ -38,7 +38,7 @@ ContactPairingRequest ::= SEQUENCE {
 The following MUST also be true, or else the pairing request will be rejected and a [`ContactPairingFailure` message](#contact-pairing-failure) will be sent to the requester:
 
 - `requesterAwalaEndpointPublicKey` corresponds to the Awala endpoint that sent the service message.
-- `prospectiveContactVeraid` is a well-formed VeraId identifier (e.g., `maria@example.com`, `example.com`).
+- `prospectiveContactVeraid` is a well-formed VeraId identifier for a user (e.g., `maria@example.com`), not a bot (e.g., `example.com`).
 
 ### Contact pairing authorisation
 
@@ -59,11 +59,19 @@ This message signifies that a pairing request has failed.
 The ASN.1 `ContactPairingFailure` structure is defined as follows:
 
 ```asn1
+ContactPairingFailure :: INTEGER {
+  REQUESTER_AWALA_KEY_MISMATCH(0)
+}
+
 ContactPairingFailure ::= SEQUENCE {
   prospectiveContactVeraid [0] UTF8String,  -- E.g., "maria@example.com"
-  reason                   [1] VisibleString
+  reason                   [1] ContactPairingFailure
 }
 ```
+
+Where the `ContactPairingFailure` can be one of the following:
+
+- `REQUESTER_AWALA_KEY_MISMATCH`: The requester's Awala endpoint public key does not correspond to the one that sent the service message.
 
 ## Security considerations
 

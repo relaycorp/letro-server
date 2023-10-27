@@ -99,7 +99,9 @@ describe('verifyVeraidSignature', () => {
       const result = await verifyVeraidSignature(SIGNATURE_BUNDLE);
 
       expect(result.didSucceed).toBeTrue();
-      expect((result as SuccessfulResult<ValidSignature>).result.signerVeraidId).toBe(USER_ID);
+      const signature = (result as SuccessfulResult<ValidSignature>).result;
+      expect(signature.signerVeraidId).toBe(USER_ID);
+      expect(signature.signerVeraidName).toBe(USER_NAME);
     });
 
     test('Member id should be allowed to be that of a bot', async () => {
@@ -111,7 +113,9 @@ describe('verifyVeraidSignature', () => {
       const result = await verifyVeraidSignature(SIGNATURE_BUNDLE);
 
       expect(result.didSucceed).toBeTrue();
-      expect((result as SuccessfulResult<ValidSignature>).result.signerVeraidId).toBe(ORG_NAME);
+      const signature = (result as SuccessfulResult<ValidSignature>).result;
+      expect(signature.signerVeraidId).toBe(ORG_NAME);
+      expect(signature.signerVeraidName).toBeUndefined();
     });
 
     test('Plaintext should be extracted from the signature', async () => {

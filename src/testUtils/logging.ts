@@ -37,3 +37,11 @@ export function partialPinoLog(
     ...extraAttributes,
   });
 }
+
+export function makeErrorLogMatcher(error: Error): any {
+  return expect.objectContaining({
+    type: error.name,
+    message: error.message,
+    ...(error.cause !== undefined && { cause: error.cause }),
+  });
+}

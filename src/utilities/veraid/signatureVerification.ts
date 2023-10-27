@@ -6,14 +6,13 @@ import { LETRO_VERAID_SVC_OID } from '../letro.js';
 
 const TTL_DAYS = 90;
 
-interface ValidSignature {
+export interface ValidSignature {
   readonly signerVeraidId: string;
+  readonly signerVeraidName?: string;
   readonly plaintext: ArrayBuffer;
 }
 
-type SignatureVerification = Result<ValidSignature, Error>;
-
-export type { ValidSignature };
+export type SignatureVerification = Result<ValidSignature, Error>;
 
 export async function verifyVeraidSignature(
   signatureBundle: ArrayBuffer,
@@ -32,6 +31,6 @@ export async function verifyVeraidSignature(
   const signerVeraidId = user === undefined ? organisation : `${user}@${organisation}`;
   return {
     didSucceed: true,
-    result: { plaintext: verificationResult.plaintext, signerVeraidId },
+    result: { plaintext: verificationResult.plaintext, signerVeraidId, signerVeraidName: user },
   };
 }
