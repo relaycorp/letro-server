@@ -6,6 +6,7 @@ import {
   type FastifyPluginCallback,
   type HTTPMethods,
 } from 'fastify';
+import fastifyGracefulShutdown from 'fastify-graceful-shutdown';
 import env from 'env-var';
 import type { BaseLogger } from 'pino';
 
@@ -47,6 +48,9 @@ export async function makeFastify(
 
     trustProxy: true,
   });
+
+  await server.register(fastifyGracefulShutdown, { resetHandlersOnInit: true });
+
   await server.register(fastifyMongoose);
 
   await server.register(fastifyRoutes);
