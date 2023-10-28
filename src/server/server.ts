@@ -2,12 +2,12 @@ import type { FastifyInstance, FastifyPluginCallback, RouteOptions } from 'fasti
 import type { BaseLogger } from 'pino';
 
 import { makeFastify } from '../utilities/fastify/server.js';
+import registerHealthcheckRoutes from '../utilities/fastify/plugins/healthCheck.js';
 
-import healthcheckRoutes from './healthcheck.js';
 import incomingAwalaServiceMessages from './awalaServiceMessages.js';
 
 const rootRoutes: FastifyPluginCallback<RouteOptions>[] = [
-  healthcheckRoutes,
+  registerHealthcheckRoutes,
   incomingAwalaServiceMessages,
 ];
 
