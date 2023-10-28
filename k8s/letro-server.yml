@@ -16,7 +16,7 @@ spec:
           env:
             - name: MONGODB_URI
               value: mongodb://mongodb.default
-            - name: MONGODB_USERNAME
+            - name: MONGODB_USER
               valueFrom:
                 configMapKeyRef:
                   name: credentials
@@ -42,7 +42,7 @@ spec:
               path: /
               port: 8080
             periodSeconds: 5
-            failureThreshold: 2
+            failureThreshold: 1
             timeoutSeconds: 3
           readinessProbe:
             httpGet:
