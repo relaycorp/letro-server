@@ -26,8 +26,9 @@
     "@relaycorp/cloudevents-transport": "^1.3.0",
     "@relaycorp/pino-cloud": "^1.0.28",
     "@relaycorp/relaynet-core": "^1.87.0",
+    "@relaycorp/veraid": "^1.15.0",
     "@relaycorp/veraid-authority": "^1.9.1",
-    "@typegoose/typegoose": "^11.3.0",
+    "@typegoose/typegoose": "^11.6.0",
     "cloudevents": "^7.0.1",
     "confusables": "^1.1.1",
     "date-fns": "^2.30.0",
@@ -42,7 +43,7 @@
     "unique-username-generator": "^1.2.0"
   },
   "devDependencies": {
-    "@jest/globals": "^29.5.0",
+    "@jest/globals": "^29.7.0",
     "@relaycorp/eslint-config": "^1.1.118",
     "@relaycorp/shared-config": "^1.14.1",
     "@shelf/jest-mongodb": "^4.1.7",

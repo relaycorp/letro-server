@@ -6,6 +6,7 @@ import { partialPinoLog } from '../../testUtils/logging.js';
 import { RELAYCORP_LETRO_TYPES } from '../../utilities/letro.js';
 import { VERSION } from '../../testUtils/envVars.js';
 import { bufferToArrayBuffer } from '../../utilities/buffer.js';
+import { NON_ASCII_DOMAIN_NAME } from '../../utilities/domains.js';
 
 import { AWALA_CONTENT_TYPES } from './awala.js';
 
@@ -43,13 +44,13 @@ beforeEach(() => {
 const DOMAIN_NAME = 'example.com';
 const DOMAIN_NAME_BUFFER = Buffer.from(DOMAIN_NAME);
 
-describe('connectionParamsRetrieval handler', () => {
-  const { senderEndpointId, recipientEndpointId, emittedEvents, logs, runner } =
-    makeSinkTestRunner(connectionParamsRetrieval);
+const { senderEndpoint, recipientEndpointId, emittedEvents, logs, runner } =
+  await makeSinkTestRunner(connectionParamsRetrieval);
 
+describe('connectionParamsRetrieval handler', () => {
   const misconfiguredEndpointMatch = expect.objectContaining({
     source: recipientEndpointId,
-    subject: senderEndpointId,
+    subject: senderEndpoint.id,
     datacontenttype: RELAYCORP_LETRO_TYPES.MISCONFIGURED_ENDPOINT,
     data: DOMAIN_NAME_BUFFER,
   });
@@ -84,12 +85,14 @@ describe('connectionParamsRetrieval handler', () => {
     });
 
     test('Non-ASCII domain names should be allowed', async () => {
-      const domainName = 'はじめよう.みんな';
-      const domainNameBuffer = Buffer.from(domainName);
+      const domainNameBuffer = Buffer.from(NON_ASCII_DOMAIN_NAME);
 
       await expect(runner(domainNameBuffer)).resolves.toBeTrue();
 
-      expect(mockResolveInternetAddress).toHaveBeenCalledWith(domainName, expect.anything());
+      expect(mockResolveInternetAddress).toHaveBeenCalledWith(
+        NON_ASCII_DOMAIN_NAME,
+        expect.anything(),
+      );
     });
 
     test('Malformed domain name should be refused', async () => {
@@ -288,7 +291,7 @@ describe('connectionParamsRetrieval handler', () => {
       await expect(runner(DOMAIN_NAME_BUFFER)).resolves.toBeTrue();
 
       const [event] = emittedEvents;
-      expect(event.subject).toBe(senderEndpointId);
+      expect(event.subject).toBe(senderEndpoint.id);
     });
 
     test('Content type should be the connection params content type', async () => {

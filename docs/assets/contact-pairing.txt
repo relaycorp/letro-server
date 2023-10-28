@@ -1,21 +1,21 @@
 title Contact pairing
 
 actor alice@applepie.rocks
-actor bob@tickety.boo
+actor bob@cuppa.fans
 participant Server
 
 group Phase 1: Exchange requests
-alice@applepie.rocks->Server:Pairing request (bob@tickety.boo)
+alice@applepie.rocks->Server:Pairing request #1 (bob@cuppa.fans)
 note over Server:No reciprocal request found
-Server<-bob@tickety.boo:Pairing request (alice@applepie.rocks)
+Server<-bob@cuppa.fans:Pairing request #2 (alice@applepie.rocks)
 note over Server:Reciprocal request found
-bob@tickety.boo<-Server:Pairing match (alice@applepie.rocks)
-alice@applepie.rocks<-Server:Pairing match (bob@tickety.boo)
+bob@cuppa.fans<-Server:Pairing request #1
+alice@applepie.rocks<-Server:Pairing request #2
 end
 
 group Phase 2: Exchange authorisations
-bob@tickety.boo->Server:Pairing auth (alice@applepie.rocks)
-alice@applepie.rocks<-Server:Pairing auth (alice@applepie.rocks)
-alice@applepie.rocks->Server:Pairing auth (bob@tickety.boo)
-bob@tickety.boo<-Server:Pairing auth (bob@tickety.boo)
+bob@cuppa.fans->Server:Pairing authorisation #1 (alice@applepie.rocks)
+alice@applepie.rocks<-Server:Pairing authorisation #1
+alice@applepie.rocks->Server:Pairing authorisation #2 (bob@cuppa.fans)
+bob@cuppa.fans<-Server:Pairing authorisation #2
 end

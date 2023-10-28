@@ -28,20 +28,20 @@ function serialiseContactMatch(
   );
 }
 
+const {
+  getDbConnection,
+  logs,
+  emittedEvents,
+  senderEndpoint: requesterEndpoint,
+  recipientEndpointId: ownEndpointId,
+  runner,
+} = await makeSinkTestRunner(pairingRequestTmp);
+
 describe('contactRequestTmp', () => {
   const requesterVeraId = 'requester@example.com';
   const requesterIdKey = Buffer.from('requesterIdKey');
   const targetVeraId = 'target@foo.bar';
   const targetIdKey = Buffer.from('targetIdKey');
-
-  const {
-    getDbConnection,
-    logs,
-    emittedEvents,
-    senderEndpointId: requesterEndpointId,
-    recipientEndpointId: ownEndpointId,
-    runner,
-  } = makeSinkTestRunner(pairingRequestTmp);
 
   let requestModel: ReturnModelType<typeof ContactPairingRequest>;
   beforeEach(() => {
@@ -65,7 +65,12 @@ describe('contactRequestTmp', () => {
       ).resolves.toBeTrue();
 
       await expect(
-        requestModel.exists({ requesterVeraId, targetVeraId, requesterEndpointId, requesterIdKey }),
+        requestModel.exists({
+          requesterVeraId,
+          targetVeraId,
+          requesterEndpointId: requesterEndpoint.id,
+          requesterIdKey,
+        }),
       ).resolves.not.toBeNull();
       expect(logs).toContainEqual(
         partialPinoLog('info', 'Contact request created or updated', {
@@ -91,7 +96,7 @@ describe('contactRequestTmp', () => {
         requestModel.exists({
           requesterVeraId,
           targetVeraId,
-          requesterEndpointId,
+          requesterEndpointId: requesterEndpoint.id,
           requesterIdKey,
         }),
       ).resolves.toBeNull();
@@ -99,7 +104,7 @@ describe('contactRequestTmp', () => {
         requestModel.exists({
           requesterVeraId,
           targetVeraId,
-          requesterEndpointId,
+          requesterEndpointId: requesterEndpoint.id,
           requesterIdKey: requesterIdKey2,
         }),
       ).resolves.not.toBeNull();
@@ -149,7 +154,7 @@ describe('contactRequestTmp', () => {
       expect(event1).toMatchObject(
         expect.objectContaining<Partial<CloudEventV1<Buffer>>>({
           source: ownEndpointId,
-          subject: requesterEndpointId,
+          subject: requesterEndpoint.id,
           datacontenttype: MATCH_CONTENT_TYPE,
 
           // eslint-disable-next-line @typescript-eslint/naming-convention,camelcase
@@ -162,7 +167,7 @@ describe('contactRequestTmp', () => {
         }),
       );
       expect(logs).toContainEqual(
-        partialPinoLog('debug', 'Pairing match sent', { peerId: requesterEndpointId }),
+        partialPinoLog('debug', 'Pairing match sent', { peerId: requesterEndpoint.id }),
       );
       expect(event2).toMatchObject(
         expect.objectContaining<Partial<CloudEventV1<Buffer>>>({
@@ -174,7 +179,7 @@ describe('contactRequestTmp', () => {
           data_base64: serialiseContactMatch(
             targetVeraId,
             requesterVeraId,
-            requesterEndpointId,
+            requesterEndpoint.id,
             requesterIdKey,
           ).toString('base64'),
         }),

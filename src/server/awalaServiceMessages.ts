@@ -12,15 +12,17 @@ import {
   type IncomingServiceMessage,
   makeIncomingServiceMessage,
 } from '../utilities/awalaEndpoint.js';
+import pairingRequest from '../sinks/contactPairing/pairingRequest.js';
 import pairingRequestTmp from '../sinks/contactPairing/pairingRequestTmp.js';
-import pairingAuthTmp from '../sinks/contactPairing/pairingAuthTmp.js';
-import { VeraidAuthClientMaker } from '../utilities/VeraidAuthClientMaker.js';
+import pairingAuth from '../sinks/contactPairing/pairingAuth.js';
+import { VeraidAuthClientMaker } from '../utilities/veraid/VeraidAuthClientMaker.js';
 
 const SINKS: MessageSink[] = [
   accountCreation,
   connParamsRetrieval,
+  pairingRequest,
   pairingRequestTmp,
-  pairingAuthTmp,
+  pairingAuth,
 ];
 const HANDLER_BY_TYPE: { [contentType: string]: MessageSinkHandler } = SINKS.reduce(
   (acc, sink) => ({ ...acc, [sink.contentType]: sink.handler }),
