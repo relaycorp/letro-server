@@ -211,7 +211,7 @@ const pairingRequest: MessageSink = {
       await processMatch(
         { endpointId: message.senderId, veraId: requesterVeraidId },
         targetVeraidId,
-        message.content,
+        matchingRequest.signatureBundle!,
         message.recipientId,
         emitter,
         requestModel,
@@ -224,7 +224,7 @@ const pairingRequest: MessageSink = {
           veraId: matchingRequest.requesterVeraId,
         },
         matchingRequest.targetVeraId,
-        matchingRequest.signatureBundle!,
+        message.content,
         message.recipientId,
         emitter,
         requestModel,

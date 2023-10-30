@@ -376,7 +376,7 @@ describe('contactRequest', () => {
           subject: targetEndpoint.id,
           datacontenttype: CONTACT_PAIRING_CONTENT_TYPES.REQUEST,
           // eslint-disable-next-line @typescript-eslint/naming-convention,camelcase
-          data_base64: bundle2.toString('base64'),
+          data_base64: bundle1.toString('base64'),
         }),
         expect.objectContaining<Partial<CloudEventV1<Buffer>>>({
           type: OUTGOING_SERVICE_MESSAGE_TYPE,
@@ -384,7 +384,7 @@ describe('contactRequest', () => {
           subject: requesterEndpoint.id,
           datacontenttype: CONTACT_PAIRING_CONTENT_TYPES.REQUEST,
           // eslint-disable-next-line @typescript-eslint/naming-convention,camelcase
-          data_base64: bundle1.toString('base64'),
+          data_base64: bundle2.toString('base64'),
         }),
       ]);
       expect(logs).toContainEqual(
