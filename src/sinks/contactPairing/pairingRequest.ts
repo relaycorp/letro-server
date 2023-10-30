@@ -54,13 +54,13 @@ async function extractSignedPairingRequest(
     return null;
   }
 
-  const requesterAwalaEndpointPublicKey = Buffer.from(
+  const requesterAwalaIdKeyDer = Buffer.from(
     AsnSerializer.serialize(request.requesterAwalaEndpointPublicKey),
   );
   return {
     requesterVeraidId: verificationResult.result.signerVeraidId,
     requesterVeraidName: verificationResult.result.signerVeraidName,
-    requesterAwalaIdKeyDer: requesterAwalaEndpointPublicKey,
+    requesterAwalaIdKeyDer,
     targetVeraidId: request.targetVeraidId,
   };
 }
@@ -68,16 +68,15 @@ async function extractSignedPairingRequest(
 async function replyWithFailure(
   targetVeraidId: string,
   reason: ContactPairingFailureReason,
-  senderId: string,
-  recipientId: string,
+  incomingMessage: IncomingServiceMessage,
   emitter: Emitter<unknown>,
 ) {
   const failureMessage = new ContactPairingFailure();
   failureMessage.targetContactVeraid = targetVeraidId;
   failureMessage.reason = reason;
   const failureEvent = makeOutgoingServiceMessage({
-    senderId,
-    recipientId,
+    senderId: incomingMessage.recipientId,
+    recipientId: incomingMessage.senderId,
     contentType: CONTACT_PAIRING_CONTENT_TYPES.FAILURE,
     content: Buffer.from(AsnSerializer.serialize(failureMessage)),
   });
@@ -85,53 +84,53 @@ async function replyWithFailure(
 }
 
 async function validatePairingRequest(
-  {
-    requesterVeraidId,
-    requesterVeraidName,
-    requesterAwalaIdKeyDer,
-    targetVeraidId,
-  }: SignedPairingRequest,
+  { requesterVeraidName, requesterAwalaIdKeyDer, targetVeraidId }: SignedPairingRequest,
   message: IncomingServiceMessage,
   logger: FastifyBaseLogger,
   emitter: Emitter<unknown>,
 ): Promise<boolean> {
   if (requesterVeraidName === undefined) {
-    logger.info({ requesterVeraidId }, 'Refused contact pairing request from a VeraId org bot');
+    logger.info('Refused contact pairing request from a VeraId org bot');
     await replyWithFailure(
       targetVeraidId,
       ContactPairingFailureReason.INVALID_REQUESTER_VERAID,
-      message.recipientId,
-      message.senderId,
+      message,
       emitter,
     );
     return false;
   }
 
-  const requestAwareLogger = logger.child({ requesterVeraidId, targetVeraidId });
-
-  const requesterAwalaIdKey = await derDeserializeRSAPublicKey(requesterAwalaIdKeyDer);
-  const expectedRequesterAwalaId = await getIdFromIdentityKey(requesterAwalaIdKey);
-  if (message.senderId !== expectedRequesterAwalaId) {
-    requestAwareLogger.info(
-      'Refused pairing request due to mismatching Awala endpoint key from sender',
-    );
+  let requesterAwalaIdKey;
+  try {
+    requesterAwalaIdKey = await derDeserializeRSAPublicKey(requesterAwalaIdKeyDer);
+  } catch (err) {
+    logger.info({ err }, 'Refused invalid Awala id key for requester');
     await replyWithFailure(
       targetVeraidId,
       ContactPairingFailureReason.INVALID_REQUESTER_AWALA_KEY,
-      message.recipientId,
-      message.senderId,
+      message,
+      emitter,
+    );
+    return false;
+  }
+  const expectedRequesterAwalaId = await getIdFromIdentityKey(requesterAwalaIdKey);
+  if (message.senderId !== expectedRequesterAwalaId) {
+    logger.info('Refused pairing request due to mismatching Awala endpoint key from sender');
+    await replyWithFailure(
+      targetVeraidId,
+      ContactPairingFailureReason.INVALID_REQUESTER_AWALA_KEY,
+      message,
       emitter,
     );
     return false;
   }
 
   if (!isValidVeraidIdForUser(targetVeraidId)) {
-    requestAwareLogger.info('Refused pairing request because the target is not a VeraId user id');
+    logger.info('Refused pairing request because the target is not a VeraId user id');
     await replyWithFailure(
       targetVeraidId,
       ContactPairingFailureReason.INVALID_TARGET_VERAID,
-      message.recipientId,
-      message.senderId,
+      message,
       emitter,
     );
     return false;
@@ -169,10 +168,15 @@ const pairingRequest: MessageSink = {
       return true;
     }
 
+    const requestAwareLogger = logger.child({
+      requesterVeraidId: signedPairingRequest.requesterVeraidId,
+      targetVeraidId: signedPairingRequest.targetVeraidId,
+    });
+
     const isPairingRequestValid = await validatePairingRequest(
       signedPairingRequest,
       message,
-      logger,
+      requestAwareLogger,
       emitter,
     );
     if (!isPairingRequestValid) {
@@ -198,8 +202,6 @@ const pairingRequest: MessageSink = {
       },
       { upsert: true },
     );
-
-    const requestAwareLogger = logger.child({ requesterVeraidId, targetVeraidId });
 
     const matchingRequest = await requestModel.findOne({
       requesterVeraId: targetVeraidId,

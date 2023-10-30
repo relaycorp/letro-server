@@ -3,6 +3,7 @@ import { AsnSerializer } from '@peculiar/asn1-schema';
 import type { SubjectPublicKeyInfo } from '@peculiar/asn1-x509';
 import { getModelForClass, type ReturnModelType } from '@typegoose/typegoose';
 import type { CloudEventV1 } from 'cloudevents';
+import { generateECDHKeyPair } from '@relaycorp/relaynet-core';
 
 import { makeErrorLogMatcher, partialPinoLog } from '../../testUtils/logging.js';
 import { makeSinkTestRunner } from '../../testUtils/messageSinks.js';
@@ -10,7 +11,7 @@ import { ContactPairingRequest as RequestModel } from '../../models/ContactPairi
 import { mockSpy } from '../../testUtils/jest.js';
 import type { SignatureVerification } from '../../utilities/veraid/signatureVerification.js';
 import { ORG_NAME } from '../../testUtils/veraid/stubs.js';
-import { derSerialiseEncodedPublicKey } from '../../testUtils/crypto/keys.js';
+import { derSerialiseEncodedPublicKey, encodePublicKey } from '../../testUtils/crypto/keys.js';
 import { type Endpoint, generateEndpoint } from '../../testUtils/awala.js';
 import { OUTGOING_SERVICE_MESSAGE_TYPE } from '../../utilities/awalaEndpoint.js';
 
@@ -210,6 +211,32 @@ describe('contactRequest', () => {
             'Refused pairing request due to mismatching Awala endpoint key from sender',
             { requesterVeraidId, targetVeraidId },
           ),
+        );
+        expect(emittedEvents).toMatchObject([
+          makeFailureEventMatcher(
+            targetVeraidId,
+            ContactPairingFailureReason.INVALID_REQUESTER_AWALA_KEY,
+          ),
+        ]);
+        await expect(requestModel.count()).resolves.toBe(0);
+      });
+
+      test('Requester Awala endpoint public key should be valid', async () => {
+        const invalidKeyPair = await generateECDHKeyPair();
+
+        await postPairingRequest(
+          {
+            id: requesterEndpoint.id,
+            publicKey: await encodePublicKey(invalidKeyPair.publicKey), // Invalid
+          },
+          requesterVeraidId,
+          targetVeraidId,
+        );
+
+        expect(logs).toContainEqual(
+          partialPinoLog('info', 'Refused invalid Awala id key for requester', {
+            err: expect.objectContaining({ type: 'Error' }),
+          }),
         );
         expect(emittedEvents).toMatchObject([
           makeFailureEventMatcher(
