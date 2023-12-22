@@ -24,9 +24,17 @@ const ORG_MEMBERS_ENDPOINT_BY_DOMAIN: { [key in string]: string } = Object.fromE
   MANAGED_DOMAIN_NAMES.map((domain) => [domain, `/orgs/${domain}/members`]),
 ) as { [key in string]: string };
 
+const PUBLIC_KEY_PATH_REGEX = /^\/orgs\/[^/]+\/members\/[^/]+\/public-keys\/(?<publicKeyId>.+)$/u;
+
+interface KeyImportOutput {
+  readonly bundleEndpoint: string;
+  readonly publicKeyId: string;
+}
+
 interface UserCreationOutput {
   userName: string;
   bundle: ArrayBuffer;
+  publicKeyId: string;
 }
 
 function addNameSuffix(name: string): string {
@@ -73,15 +81,22 @@ async function importKey(
   publicKeysEndpoint: string,
   client: AuthorityClient,
   logger: BaseLogger,
-): Promise<string> {
+): Promise<KeyImportOutput> {
   const keyImportCommand = new MemberPublicKeyImportCommand({
     endpoint: publicKeysEndpoint,
     publicKeyDer: Buffer.from(publicKeyDer),
     serviceOid: LETRO_VERAID_SVC_OID,
   });
-  const { bundle: bundleEndpoint } = await client.send(keyImportCommand);
+  const keyImport = await client.send(keyImportCommand);
+
+  const publicKeyPathMatch = PUBLIC_KEY_PATH_REGEX.exec(keyImport.self);
+  if (!publicKeyPathMatch) {
+    logger.error({ publicKeyPath: keyImport.self }, 'Failed to extract public key id');
+    throw new Error('Failed to extract public key id');
+  }
+
   logger.debug('Public key imported in VeraId Authority');
-  return bundleEndpoint;
+  return { bundleEndpoint: keyImport.bundle, publicKeyId: publicKeyPathMatch.groups!.publicKeyId };
 }
 
 async function deleteUser(userEndpoint: string, client: AuthorityClient) {
@@ -104,16 +119,18 @@ export async function createVeraidUser(
   const { userName, output } = await createUserWithRetries(preferredUserName, org, client, logger);
 
   let bundle;
+  let publicKeyId;
   try {
-    const bundleEndpoint = await importKey(publicKeyDer, output.publicKeys, client, logger);
-    bundle = await retrieveBundle(bundleEndpoint, client);
+    const importOutput = await importKey(publicKeyDer, output.publicKeys, client, logger);
+    bundle = await retrieveBundle(importOutput.bundleEndpoint, client);
+    ({ publicKeyId } = importOutput);
   } catch (err) {
     // Clean up so we can try again later
     await deleteUser(output.self, client);
     throw new Error('Failed to complete user creation', { cause: err });
   }
 
-  return { userName, bundle };
+  return { userName, bundle, publicKeyId };
 }
 
 export type { UserCreationOutput };
