@@ -1,6 +1,6 @@
 import { sanitiseUserName, RESERVED_WORDS } from './userNameValidation.js';
 
-const GENERATED_NAME_REGEX = /^[\w-]{1,16}$/u;
+const GENERATED_NAME_REGEX = /^[\w-]{1,20}$/u;
 
 describe('sanitiseUserName', () => {
   test('Name should have at least one character', () => {
@@ -104,8 +104,8 @@ describe('sanitiseUserName', () => {
     });
   });
 
-  test('Strings longer than 16 characters should be truncated', () => {
-    const validString = 'a'.repeat(16);
+  test('Strings longer than 20 characters should be truncated', () => {
+    const validString = 'a'.repeat(20);
     expect(sanitiseUserName(validString)).toBe(validString);
 
     expect(sanitiseUserName(`${validString}b`)).toBe(validString);

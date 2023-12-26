@@ -1,7 +1,7 @@
 import { remove as replaceAsciiLookalike } from 'confusables';
 import { generateUsername } from 'unique-username-generator';
 
-const MAX_USERNAME_LENGTH = 16;
+const MAX_USERNAME_LENGTH = 20;
 const ILLICIT_CHARS_REGEX = /[\s@]/gu;
 const SINGLE_EMOJI_REGEX = /^\p{Emoji_Presentation}+(?:\u200D\p{Emoji_Presentation})*$/u;
 const SINGLE_LETTER_REGEX = /^\p{Letter}$/u;
