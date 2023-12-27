@@ -36,9 +36,11 @@ const MEMBER_CREATION_OUTCOME: ExpectedOutcome<MemberCreationOutput> = {
   output: MEMBER_CREATION_OUTPUT,
 };
 
+const MEMBER_PUBLIC_KEY_ID = 'public-key-id';
+const MEMBER_PUBLIC_KEY_PATH = `/orgs/${ORG_NAME}/members/foo/public-keys/${MEMBER_PUBLIC_KEY_ID}`;
 const MEMBER_PUBLIC_KEY_IMPORT_OUTCOME: ExpectedOutcome<MemberPublicKeyImportOutput> = {
   commandType: MemberPublicKeyImportCommand,
-  output: { self: '/self', bundle: '/bundle' },
+  output: { self: MEMBER_PUBLIC_KEY_PATH, bundle: '/bundle' },
 };
 
 const MEMBER_BUNDLE_OUTCOME: ExpectedOutcome<ArrayBuffer> = {
@@ -371,6 +373,50 @@ describe('createVeraidUser', () => {
 
       const deletionInput = client.getSentCommandInput(3, DeletionCommand);
       expect(deletionInput).toBe(MEMBER_CREATION_OUTPUT.self);
+    });
+  });
+
+  describe('Public key id', () => {
+    test('Public key id should be taken from public key URL', async () => {
+      const client = new MockAuthorityClient([
+        MEMBER_CREATION_OUTCOME,
+        MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+        MEMBER_BUNDLE_OUTCOME,
+      ]);
+
+      const { publicKeyId } = await createVeraidUser(
+        USER_NAME,
+        ORG_NAME,
+        MEMBER_PUBLIC_KEY_DER,
+        client,
+        logger,
+      );
+
+      expect(publicKeyId).toBe(MEMBER_PUBLIC_KEY_ID);
+    });
+
+    test('User should be deleted if public key id could not be extracted', async () => {
+      const invalidUrlPath = '/invalid/path';
+      const client = new MockAuthorityClient([
+        MEMBER_CREATION_OUTCOME,
+        {
+          ...MEMBER_PUBLIC_KEY_IMPORT_OUTCOME,
+          output: { ...MEMBER_BUNDLE_OUTCOME.output, self: invalidUrlPath },
+        },
+        MEMBER_DELETION_OUTCOME,
+      ]);
+
+      await expect(
+        createVeraidUser(USER_NAME, ORG_NAME, MEMBER_PUBLIC_KEY_DER, client, logger),
+      ).toReject();
+
+      const deletionInput = client.getSentCommandInput(2, DeletionCommand);
+      expect(deletionInput).toBe(MEMBER_CREATION_OUTPUT.self);
+      expect(logs).toContainEqual(
+        partialPinoLog('error', 'Failed to extract public key id', {
+          publicKeyPath: invalidUrlPath,
+        }),
+      );
     });
   });
 });
