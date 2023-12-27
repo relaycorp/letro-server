@@ -163,12 +163,16 @@ const pairingRequest: MessageSink = {
   contentType: CONTACT_PAIRING_CONTENT_TYPES.REQUEST,
 
   async handler(message, { logger, emitter, dbConnection }) {
-    const signedPairingRequest = await extractSignedPairingRequest(message.content, logger);
+    const peerAwareLogger = logger.child({ peerId: message.senderId });
+    const signedPairingRequest = await extractSignedPairingRequest(
+      message.content,
+      peerAwareLogger,
+    );
     if (!signedPairingRequest) {
       return true;
     }
 
-    const requestAwareLogger = logger.child({
+    const requestAwareLogger = peerAwareLogger.child({
       requesterVeraidId: signedPairingRequest.requesterVeraidId,
       targetVeraidId: signedPairingRequest.targetVeraidId,
     });

@@ -147,7 +147,7 @@ describe('contactRequest', () => {
         partialPinoLog(
           'info',
           'Refused invalid VeraId SignatureBundle for contact pairing request',
-          { err: makeErrorLogMatcher(error) },
+          { err: makeErrorLogMatcher(error), peerId: requesterEndpoint.id },
         ),
       );
       expect(emittedEvents).toBeEmpty();
@@ -172,6 +172,7 @@ describe('contactRequest', () => {
       expect(logs).toContainEqual(
         partialPinoLog('info', 'Refused malformed contact pairing request', {
           err: expect.objectContaining({ type: 'Error' }),
+          peerId: requesterEndpoint.id,
         }),
       );
       expect(emittedEvents).toBeEmpty();
@@ -183,6 +184,7 @@ describe('contactRequest', () => {
       expect(logs).toContainEqual(
         partialPinoLog('info', 'Refused contact pairing request from a VeraId org bot', {
           requesterVeraidId: ORG_NAME,
+          peerId: requesterEndpoint.id,
         }),
       );
       expect(emittedEvents).toMatchObject([
